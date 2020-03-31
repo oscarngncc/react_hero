@@ -2,7 +2,9 @@
 
 import React, { Component } from 'react'
 import Style from "./../../css/Style.module.css";
+import Weapon from "./../equipment/Weapon";
 import Status from "./Status";
+
 
 export class Player extends Component {
 
@@ -19,10 +21,15 @@ export class Player extends Component {
     }
 
 
+
+
     //Return Character Sprite
     render() {
         return (
-            <div class={Style.player}>
+            <div class={Style.player} >   
+                <Weapon isRightHand = "true" isAnimateUp="true" />
+                <img alt="Player"></img>
+                <Weapon isRightHand = "false" isAnimateUp="false" />  
             </div>
         );
     }

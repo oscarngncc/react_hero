@@ -15,6 +15,7 @@ body {
 
 
 .game {
+  min-width: 48rem;
   width: 50vw;
   height: 100vh;
   background-color: white;
@@ -28,21 +29,105 @@ body {
   height: 48rem;
   width: 27rem;
 
+  /* Force Middle Image*/
   top: 4rem;
   left: 0; 
   right: 0; 
   margin-left: auto; 
   margin-right: auto;
   position: absolute;
+
   z-index: 0;
 }
 
 
+.monster {
+  margin: 3rem;
+  height: 20rem;
+  width: 40rem;
+  background-color: brown;
+  
+  position: relative;
+  z-index: 1;
+}
+
+
 .player {
-  height: 9rem;
-  width: 8rem;
+  margin: 1rem;
+  height: 10rem;
+  width: 10rem;
   background-color: red;
+  
 
   position: relative;
   z-index: 1;
 }
+
+
+.weapon {
+  width: 2rem;
+  height: 5rem;
+  top: 0rem;
+  background-color: lightblue;
+  display: inline-block;
+
+  /*simple animation*/
+  transition: top 100ms ease-in;
+
+  position: relative;
+  z-index: 2;
+}
+
+
+
+.mirror {
+  -webkit-transform: matrix(-1, 0, 0, 1, 0, 0);
+  -moz-transform: matrix(-1, 0, 0, 1, 0, 0);
+  -o-transform: matrix(-1, 0, 0, 1, 0, 0);
+  transform: matrix(-1, 0, 0, 1, 0, 0);
+  font-weight: bold;
+}
+
+
+.handDraw {
+  
+  width: 50rem;
+  height: 8rem;
+  top: 2rem;
+
+  list-style-type: none;
+  position: relative;
+  z-index: 2;
+  overflow: visible;
+}
+
+
+
+.cardListItem {
+  margin: 0rem 0.5rem;
+  color: black;
+  display: inline-block;
+  overflow: visible; 
+}
+
+
+
+
+.card {
+  width: 5rem;
+  height: 6.5rem;
+  background-color: aqua;
+  border-radius: 5px;
+
+  transition: transform 0.3s ease-out;
+  transform: rotate(0deg);
+}
+
+
+.card:hover {
+  transform: scale(1.6);
+  border: 1px solid yellow;
+  box-shadow: 0 0 5px 1px yellow;
+}
+
+

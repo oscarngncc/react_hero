@@ -1,6 +1,7 @@
 
-import React, { Component } from 'react'
-import Status from './Status'
+import React, { Component } from 'react';
+import Status from './Status';
+import Style from './../../css/Style.module.css';
 
 
 export class Monster extends Component {
@@ -10,8 +11,9 @@ export class Monster extends Component {
     }
 
     constructor(props){
+        super(props);
         this.state.status = props.status;
-        
+
         if ( ! this.state.status === typeof Status ){ 
             throw new Error("Monster doesn't receive a status");
         }  
@@ -19,7 +21,8 @@ export class Monster extends Component {
 
     render() {
         return (
-            <div></div>
+            <div class={Style.monster} >
+            </div>
         )
     }
 }
