@@ -10,7 +10,7 @@
 
 
 * {
-  overflow: hidden; 
+  overflow: visible; 
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -19,23 +19,23 @@
 body {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 10px;
-  color: white;
-  background-color: black; 
+  background-color: black;
+  overflow: hidden; 
 }
 
 
 .game {
   min-width: 72rem;
-  width: 50vw;
+  width: 70vw;
   height: 100vh;
-  background-color: white;
+  background-color: rgb(20,20,20);
   position: relative;
+  overflow: hidden; 
 }
 
 
 
 .backgroundIMG {
-  background-color: wheat;
   height: 48rem;
   width: 27rem;
 
@@ -64,7 +64,7 @@ body {
 
 .player {
   margin: 1rem;
-  height: 10rem;
+  height: 15rem;
   width: 10rem;
   background-color: red;
   
@@ -89,7 +89,7 @@ body {
 }
 
 
-
+/* For Mirroring */
 .mirror {
   -webkit-transform: matrix(-1, 0, 0, 1, 0, 0);
   -moz-transform: matrix(-1, 0, 0, 1, 0, 0);
@@ -99,18 +99,52 @@ body {
 }
 
 
+/*
+************* Card-Related-Stuff *******************
+*/
+
+
+/* Card Section */
+.cardSection {
+  overflow: visible;
+  width: auto;
+  height: auto;
+  margin: 5rem 0rem;
+}
+
+
+.deck {
+  overflow: visible;
+  position: relative;
+  top: 3rem; /*wrong*/
+  left: 0.5rem;
+
+  display: none; /*wrong*/
+  z-index: 2;
+}
+
+
+.cardDeckItem {
+  position: absolute;
+  /* Default, dynamic*/
+  top: 0; 
+  left: 0;
+}
+
+
+
 .handDraw {
+  width: 100%;
+  min-width: 60rem;
+  height: 18rem;
   
-  width: 50rem;
-  height: 13rem;
-  top: 2rem;
+  overflow: visible;
+  position: relative;
 
   list-style-type: none;
-  position: relative;
   z-index: 2;
-  overflow: visible;
 
-  background-color: greenyellow;
+
 }
 
 
@@ -126,19 +160,23 @@ body {
   overflow: visible; 
 
   /* Dynamic */
+  z-index: 3;
   margin: 0rem 0.5rem;   
   top: 0px;
 }
 
 
 .cardListItem:hover {
-  z-index: 4;
+  z-index: 8;
 }
 
 
 .card {
-  width: 7.5rem;
-  height: 10rem;
+  --card-width: 10rem;
+  --card-height: 13rem;
+
+  width: var(--card-width);
+  height: var(--card-height);
   perspective: 1000px;
   border-radius: 5px;
   overflow: visible;
@@ -163,7 +201,7 @@ body {
 
 
 .frontCard, .rearCard {
-  border: solid 4px black;
+  border: solid 3px darkorange;
   width: 100%;
   height: 100%;
   border-radius: 5px;
@@ -175,7 +213,8 @@ body {
   backface-visibility: hidden;
   -moz-backface-visibility: hidden;
 
-  transition: transform 0.3s ease-out;
+  transition: transform 0.25s ease-out,
+              border 0.4s ease-out;
 }
 
 
@@ -192,10 +231,62 @@ body {
 .frontCard.hoverableCard:hover {
   transform: scale(1.6);
   border: 1px solid yellow;
-  box-shadow: 0 0 5px 1px yellow;
-  
-  
+  box-shadow: 0 0 5px 3px yellow;  
 }
 
 
 
+/*
+************* UI-Related-Stuff *******************
+*/
+.appBar {
+  float: right;
+  color: white;
+}
+
+.appBar li {
+  list-style: none;
+  float: left;
+  margin: 0.5rem 0.5rem;
+  font-size: 1rem;
+}
+
+
+.statusBar {
+  position: relative;
+  overflow: hidden;
+  float: left;
+  width: 100%;
+}
+
+.statusBar ul {
+  list-style-type: none;
+  text-align:center;
+  
+  clear: left;
+  float: left;
+  left: 50%;
+  position: relative;
+}
+
+.statusBar ul li {
+  display: block;
+  float: left;
+  position: relative;
+  right: 50%;
+
+  margin: 0rem 1rem;
+
+  color: white;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+  font-size: large;
+}
+
+.modalWindow {
+  top : 50%;
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  margin-right: -50%;
+  transform : translate(-50%, -50%);
+}

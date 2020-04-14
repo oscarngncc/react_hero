@@ -1,10 +1,11 @@
 
 
 
-//Status Class for Entities
+/// Example of class-like function
+/// Using status as an example
 function Status(HP, MaxHP, MP, MaxMP, Atk, Def, Magic ){
     
-
+    //Field Number
     this.MaxHP = MaxHP;
     this.HP = HP;
     this.MP = MP;
@@ -13,6 +14,7 @@ function Status(HP, MaxHP, MP, MaxMP, Atk, Def, Magic ){
     this.Def = Def;
     this.Magic = Magic;
     
+    //Functions 
     this.loseHP = function(loseHP){
         if (typeof HP === 'undefined') throw new Error("this doesn't have a HP");
         this.HP -= loseHP;
@@ -28,8 +30,7 @@ function Status(HP, MaxHP, MP, MaxMP, Atk, Def, Magic ){
     };
     
 }
+//export default for other file to import;
 export default Status;
-
-
-//Alternatively to export a function:
+//Alternative to export a function:
 // export function();  import {function} from './file'

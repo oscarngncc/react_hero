@@ -11,6 +11,8 @@ export class Card extends Component {
         name:"Card",
         content: "frontCard",
         isFaceDown: false,
+        hoverable: true,
+        clickable: true,
     }
 
     wrapperRef;
@@ -18,25 +20,37 @@ export class Card extends Component {
     constructor(props){
         super(props);
         this.state.name = props.name;
-        this.state.isFaceDown = props.isFaceDown;
         this.wrapperRef = React.createRef();
         this.onClick = this.onClick.bind(this);
+
+        if (props.isFaceDown !== undefined ){
+            this.state.isFaceDown = props.isFaceDown;
+        }
+        if (props.hoverable !== undefined ){
+            this.state.hoverable = props.hoverable;
+        }
+        if (props.clickable !== undefined ){
+            this.state.clickable = props.clickable;
+        }
     }
 
     onClick(){
-        const wrapper = this.wrapperRef.current;
-        wrapper.classList.toggle(Style.isFlipped);
+        if ( this.state.clickable ){
+            const wrapper = this.wrapperRef.current;
+            wrapper.classList.toggle(Style.isFlipped);
+        }
     }
 
 
     render(){
+        var hoverableCard = (this.state.hoverable) ? Style.hoverableCard : "";
         return (
         <div class={Style.card} onClick={()=>this.onClick()} >
             <div class={Style.cardInner} ref = {this.wrapperRef}  >
-                <div class={[ Style.frontCard, Style.hoverableCard].join(' ')}>
+                <div class={[ Style.frontCard, hoverableCard ].join(' ')}>
                     {this.state.content}
                 </div>
-                <div class={[ Style.rearCard, Style.hoverableCard].join(' ')}>
+                <div class={[ Style.rearCard, hoverableCard ].join(' ')}>
                     rearCard
                 </div>
             </div>
