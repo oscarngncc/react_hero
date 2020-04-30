@@ -4,7 +4,7 @@ import Player from './components/entity/Player';
 import Monster from './components/entity/Monster';
 import HandDraw from './components/card/HandDraw';
 import Deck from './components/card/Deck';
-import StatusBar from './components/ui/CharacterStatus';
+import StatusBar from './components/ui/CharacterStatusBar';
 import AppBar from './components/ui/AppBar';
 
 
