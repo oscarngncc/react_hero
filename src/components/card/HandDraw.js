@@ -2,43 +2,122 @@
 import React, {Component} from 'react' ;
 import Card from './Card';
 import Style from './../../css/Style.module.css';
+import { connect } from 'react-redux';
 
-export class HandDraw extends Component {
+class HandDraw extends Component {
 
-    state = {
-        cardList: [1,2,3,4,5,6,7],
-    };
-    
+
+   static defaultProps = {
+       cardList: [1,2,3,4,5,6,7,8],
+   };
+
+   
    constructor(props){
        super(props);
-       this.onClick = this.onClick.bind(this);
+       this.clickCard = this.clickCard.bind(this);
        this.renderCardListItem = this.renderCardListItem.bind(this);
-       if ( props.cardList !== undefined ){
-            this.state.cardList = props.cardList;
+       this.Dismiss = this.Dismiss.bind(this);
+       this.animateAppear= this.animateAppear.bind(this);
+       this.animateToStage = this.animateToStage.bind(this);
+       this.cardRefs = [];
+
+
+       this.state = {
+           cardList: props.cardList,
+           styles: {},
        }
-    
+   }
+
+   componentDidMount(){
+    for ( let i = 0; i < this.state.cardList.length; i++ ){
+        this.animateAppear(i);
+    }
    }
 
 
-   onClick(){
-        let newList = this.state.cardList;
-        newList.pop();
-        console.log(newList);
+   /**
+    * Effect after clicking the card
+    * @param {*} index 
+    */
+   clickCard(index){
+        //this.animateToStage(index);    
+        this.Dismiss(index);  
+   }
 
-        this.setState({
-            cardList : newList 
+
+   Dismiss(index){         
+        this.setState(prevState => {
+            let newCardList = prevState.cardList;
+            newCardList.splice(index, 1);
+            return {
+                cardList: newCardList
+            }
         });
    }
 
+
+
+   animateAppear(index){
+       this.cardRefs[index].current.classList.toggle(Style.isInit);
+   }
+
+
+
+   /**
+    * Moving Card from X to stage
+    * @param {*} index 
+    */
+   animateToStage(index){
+        let endCoord = this.props.animationStatus.positions["Stage"];
+
+        let domRect = this.cardRefs[index].current.getBoundingClientRect();
+        let xPos = domRect['x'] + domRect['width'] / 2;
+        let yPos = domRect['y'] + domRect['height'] / 2; 
+        
+        let xDis =  endCoord["xPos"] - xPos;
+        let yDis =  endCoord["yPos"] - yPos;
+
+        //Animation: Option 1
+        //this.cardRefs[index].current.style.left = xDis.toString() + "px";
+        //this.cardRefs[index].current.style.top = yDis.toString() + "px";
+
+        //Animation: Option 2
+        this.setState(prevState => ({
+            styles: {
+                ...prevState.styles,
+                [index]: {
+                    ...prevState.styles[index],
+                    top: yDis.toString() + "px",
+                    left: xDis.toString() + "px",
+                }
+            }
+        }));     
+   }
+
+
+   
+   /**
+    * Function for rendering each individual card item, also setting things up, including refs
+    * @param {*} data 
+    * @param {*} index - index of the card
+    */
    renderCardListItem(data, index ) {
+
+        // curve equation: y = -0.005x^2
         const middle = Math.floor(this.state.cardList.length / 2);
         const rotateDegree = 2;
-        const topDistance = 0.45;
+        const topDistance = 0.85;
 
         let distance = ( -3 / this.state.cardList.length).toFixed(1).toString();
+        
         let dynamicMargin = "0rem " + distance + "rem";
         let elevation = "";
-        let topDist = ""; 
+        let topDist = "";
+        
+
+        //ref
+        let cardListItemRef = React.createRef();
+        this.cardRefs[index] = cardListItemRef;
 
         if ( index === middle ){
             elevation = "rotate("+ rotateDegree/2 +"deg)"
@@ -56,10 +135,12 @@ export class HandDraw extends Component {
                 margin: dynamicMargin,
                 transform: elevation,
                 top: topDist,
+                ...this.state.styles[index],
             }} 
-            onClick = {()=>{}}
+            onClick = { () => this.clickCard(index) }
+            ref={this.cardRefs[index] }
             key={index}>
-                <Card>{data}</Card>
+                <Card clickable={false} ></Card>
             </li>
         );
    }
@@ -76,4 +157,11 @@ export class HandDraw extends Component {
     }
 }
 
-export default HandDraw;
+
+function mapStateToProps(state){
+    return {
+        animationStatus: state.animation,
+    };
+}
+
+export default connect(mapStateToProps)(HandDraw);

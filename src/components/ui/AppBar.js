@@ -7,7 +7,7 @@ import * as UIAction from '../../state/action/UIAction';
 
 import ModalWindow from './ModalWindow';
 
-// import ModalWindow from "./ModalWindow";
+
 
 class AppBar extends Component {
 

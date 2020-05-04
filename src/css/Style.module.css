@@ -8,25 +8,30 @@
 */
 
 
-
 * {
   overflow: visible; 
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  font-size: 1.6vh;
+
+
+  /*Global Variable*/
+  --card-width: 12rem;
+  --card-height: 16rem;
+
 }
 
 body {
   font-family: Arial, Helvetica, sans-serif;
-  font-size: 10px;
   background-color: black;
   overflow: hidden; 
 }
 
 
 .game {
-  min-width: 72rem;
-  width: 70vw;
+  min-width: calc(100vh * 16/9);
+  width: 100vw;
   height: 100vh;
   background-color: rgb(20,20,20);
   position: relative;
@@ -51,10 +56,10 @@ body {
 }
 
 
-.monster {
+.stage {
   margin: 3rem;
-  height: 20rem;
-  width: 40rem;
+  height: 35rem;
+  width: 100rem;
   background-color: brown;
   
   position: relative;
@@ -74,19 +79,6 @@ body {
 }
 
 
-.weapon {
-  width: 2rem;
-  height: 5rem;
-  top: 0rem;
-  background-color: lightblue;
-  display: inline-block;
-
-  /*simple animation*/
-  transition: top 100ms ease-in;
-
-  position: relative;
-  z-index: 2;
-}
 
 
 /* For Mirroring */
@@ -104,11 +96,16 @@ body {
 */
 
 
-/* Card Section */
 .cardSection {
   overflow: visible;
-  width: auto;
-  height: auto;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  top: 5rem;
+
+  
+  display: flex;
+  justify-content: center;
   margin: 5rem 0rem;
 }
 
@@ -116,16 +113,20 @@ body {
 .deck {
   overflow: visible;
   position: relative;
-  top: 3rem; /*wrong*/
-  left: 0.5rem;
+  white-space: nowrap;
+  list-style-type: none;
 
-  display: none; /*wrong*/
-  z-index: 2;
+  margin-right: 13rem;
+  top: 1rem;
+
+  z-index: 2;  
 }
 
 
 .cardDeckItem {
   position: absolute;
+  overflow: visible;
+
   /* Default, dynamic*/
   top: 0; 
   left: 0;
@@ -134,35 +135,32 @@ body {
 
 
 .handDraw {
-  width: 100%;
-  min-width: 60rem;
   height: 18rem;
+  width: 120rem;
   
   overflow: visible;
   position: relative;
-
+  white-space: nowrap;
   list-style-type: none;
   z-index: 2;
-
 
 }
 
 
 
 .cardListItem { 
-  transition: margin 0.5s;
-  transition: top 0.5s;
-  transition: transform 0.5s;
   position: relative;
-  
-  color: black;
+  overflow: visible;
   display: inline-block;
-  overflow: visible; 
+  color: black;
+  z-index: 3;
+  
+  transition: all 0.3s ease-out;
 
   /* Dynamic */
-  z-index: 3;
   margin: 0rem 0.5rem;   
-  top: 0rem;
+  left: 0;
+  top: 0;
 }
 
 
@@ -171,10 +169,37 @@ body {
 }
 
 
-.card {
-  --card-width: 10rem;
-  --card-height: 13rem;
 
+.cardListItem.isInit{
+  animation: initCardinHand 0.4s;
+}
+
+@keyframes initCardinHand {
+  0% { 
+    -moz-transform: rotate(-15deg);
+    top: 10rem;
+    right: 20rem;
+    opacity: 0.8;
+  }
+  65% {
+    top: -0.25rem;
+    right: 3rem;
+    opacity: 1;
+  }
+  85% {
+    top: 0.15rem;
+    opacity: 1;
+  }
+  100% {  
+    top: 0rem;
+    opacity: 1;
+  }
+}
+
+
+
+
+.card {
   width: var(--card-width);
   height: var(--card-height);
   perspective: 100rem;
@@ -202,6 +227,7 @@ body {
 
 .frontCard, .rearCard {
   border: solid 0.2rem darkorange;
+  box-shadow: 0 0 0.3rem 0 darkorange;
   width: 100%;
   height: 100%;
   border-radius: 0.5rem;
@@ -279,7 +305,7 @@ body {
 
   color: white;
   text-shadow: -0.1rem 0 black, 0 0.1rem black, 0.1rem 0 black, 0 -0.1rem black;
-  font-size: large;
+  font-size: 1.4rem;
 }
 
 .modalWindow {
@@ -303,5 +329,23 @@ body {
   top: 0;
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: 0;  
 }
+
+
+:global(.ReactModal__Overlay) {
+  opacity: 0;
+  transform: translateY(-10rem);
+  transition: all 300ms ease-out;
+}
+
+:global(.ReactModal__Overlay--after-open){
+  transform: translateY(0);
+  opacity: 1;
+}
+
+:global(.ReactModal__Overlay--before-close){
+  transform: translateY(-10rem);
+  opacity: 0;
+}
+

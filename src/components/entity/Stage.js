@@ -3,14 +3,13 @@ import React, { Component } from 'react';
 import Style from './../../css/Style.module.css';
 
 
-export class Monster extends Component {
-
+export default class Stage extends Component {
     render() {
         return (
-            <div class={Style.monster} >
+            <div class={Style.stage} ref={this.selector} >
             </div>
         )
     }
 }
 
-export default Monster
+

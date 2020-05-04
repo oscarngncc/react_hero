@@ -3,16 +3,16 @@ import React, { Component } from 'react';
 import Style from './../../css/Style.module.css';
 import Card from './Card';
 
-export default class Deck extends Component {
-    
-    state = {
-        cardList: [1,2,3,4,5,6,7,8,9,10,]
-    };
 
+export default class Deck extends Component {    
+    
     constructor(props){
         super(props);
         this.onClick = this.onClick.bind(this);
-        
+
+        this.state = {
+            cardList: [1,2,3,4,5,6,7,8,9,10,]
+        }
     }
 
     onClick(){

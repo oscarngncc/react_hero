@@ -1,11 +1,12 @@
 import React from 'react';
 import Style from './css/Style.module.css';
-import Player from './components/entity/Player';
-import Monster from './components/entity/Monster';
+//import Player from './components/entity/Player';
+import Stage from './components/entity/Stage';
 import HandDraw from './components/card/HandDraw';
 import Deck from './components/card/Deck';
 import StatusBar from './components/ui/CharacterStatusBar';
 import AppBar from './components/ui/AppBar';
+import PositionalComponent from './components/misc/PositionComponent';
 
 
 function App() {
@@ -14,11 +15,10 @@ function App() {
       <div className= {Style.game} align="center" >
         <AppBar/>
         <div className={Style.backgroundIMG}  ></div>
-        <Monster/>
-        <Player/>
+        <PositionalComponent positionKey="Stage"><Stage/></PositionalComponent>
         <StatusBar />
-        <div className={Style.cardSection}>
-          <Deck/>
+        <div className={Style.cardSection} align="center">
+        <PositionalComponent positionKey="Deck"><Deck/></PositionalComponent>
           <HandDraw/>
         </div>
       </div>
