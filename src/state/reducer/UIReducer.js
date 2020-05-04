@@ -1,5 +1,5 @@
 
-import * as UIAction from './../action/UIAction';
+import * as UIAction from './../action';
 
 
 const initState = {

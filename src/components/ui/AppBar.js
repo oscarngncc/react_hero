@@ -1,14 +1,59 @@
 
-import React, { Component } from 'react'
+import React from 'react'
 import Style from "./../../css/Style.module.css";
 
-import { connect } from 'react-redux';
-import * as UIAction from '../../state/action/UIAction';
+import { useDispatch, useSelector } from 'react-redux';
+import * as UIAction from '../../state/action';
 
 import ModalWindow from './ModalWindow';
 
 
+export default function AppBar(props){
+    
+    const dispatch = useDispatch();
+    const isNewsOn = useSelector(state => state.ui.isNewsOn);
+    const isStatusOn = useSelector(state => state.ui.isStatusOn);
+    const isSettingOn = useSelector(state => state.ui.isSettingOn);
 
+    
+
+    function onClickNews(){
+        dispatch(UIAction.onToggleNews());
+    }
+
+    function onClickSetting(){
+        dispatch(UIAction.onToggleSetting());
+    }
+
+    function onClickStatus(){
+        dispatch(UIAction.onToggleStatus());
+    }
+
+    return (
+        <ul class={Style.appBar} >
+           <li onClick={ () => onClickNews()} > News </li>
+           <li><ModalWindow isOpen={isNewsOn} unmount={ () => onClickNews()} > 
+                <h1>News</h1> 
+            </ModalWindow></li>
+           
+           <li onClick={() => onClickStatus()} >Status</li> 
+           <li><ModalWindow isOpen={isStatusOn} unmount={() => onClickStatus()} >
+                <h1>Status</h1> 
+            </ModalWindow></li>
+
+           <li onClick={() => onClickSetting()}>Setting</li>
+           <li><ModalWindow isOpen={isSettingOn} unmount={() => onClickSetting()} >
+                <h1>Setting</h1> 
+            </ModalWindow></li>
+        </ul>
+    );
+}
+
+
+
+/**
+*  
+//Deprecated: See how much more efficient using Hook for the same thing!
 class AppBar extends Component {
 
     state = {
@@ -62,7 +107,6 @@ class AppBar extends Component {
 
 function mapStateToProps(state){
     return {
-        //prop : state/store.reducer
         appBarState: state.ui,
     };
 }
@@ -72,15 +116,15 @@ function mapDispatchToProps(dispatch){
     return {
         //prop function : dispatch action
         onClickNews : () => {
-            dispatch( UIAction.onToggleNews );
+            dispatch( UIAction.onToggleNews() );
         },
         onClickSetting: () => {
-            dispatch( UIAction.onToggleSetting );
+            dispatch( UIAction.onToggleSetting() );
         },
         onClickStatus: () => {
-            dispatch( UIAction.onToggleStatus );
+            dispatch( UIAction.onToggleStatus() );
         }
     }
 }
-
 export default connect(mapStateToProps, mapDispatchToProps )(AppBar);
+*/

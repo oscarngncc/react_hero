@@ -1,39 +1,25 @@
 
-import React, {Component} from 'react';
+import React from 'react';
 import Style from "./../../css/Style.module.css";
 
-//All you need to connect component to redux
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 
-
-/**
- *  status bar, subscribing to character's state
- */
-class CharacterStatusBar extends Component {
+export default function CharacterStatusBar(){
     
-    render() {
-        let HP = Math.round(this.props.gameStatus.health)
-        let MaxHP = Math.round(this.props.gameStatus.healthLimit)
-        let Money = Math.round(this.props.gameStatus.money)
-        let Hour = Math.round(this.props.gameStatus.time).toString() + ": 00"
-
-        return (
-            <div class={Style.statusBar} >
-                <ul>
-                    <li class={Style.statusBarItem}>HP: {HP}/{MaxHP}</li>
-                    <li class={Style.statusBarItem}>Money: {Money}</li>
-                    <li class={Style.statusBarItem}>Time: {Hour}</li>              
-                </ul>
-            </div>
-        )
-    }
+    const HP = useSelector(state => state.game.health);
+    const MaxHP = useSelector(state => state.game.healthLimit);
+    const Money = useSelector(state => state.game.money);
+    const Hour = useSelector(state => state.game.time);
+    
+    return (
+    <div class={Style.statusBar} >
+        <ul>
+            <li class={Style.statusBarItem}>HP: {Math.round(HP)}/{Math.round(MaxHP)}</li>
+            <li class={Style.statusBarItem}>Money: {Math.round(Money)}</li>
+            <li class={Style.statusBarItem}>Time: {Math.round(Hour) + ": 00"}</li>              
+        </ul>
+    </div>
+    );
 }
 
-function mapStateToProps(state){
-    return {
-        gameStatus: state.gameStatus,
-    };
-}
-
-export default connect(mapStateToProps)(CharacterStatusBar);

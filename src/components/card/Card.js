@@ -2,6 +2,7 @@
 import React, {Component} from 'react' ;
 import Style from './../../css/Style.module.css';
 
+
 /** 
  *  Card Component, including front side and rear side 
 */

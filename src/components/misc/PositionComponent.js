@@ -3,7 +3,7 @@
 import React, { Component } from 'react'
 
 import { connect } from 'react-redux';
-import * as AnimationAction from './../../state/action/AnimationAction';
+import * as AnimationAction from './../../state/action';
 
 import PropTypes from 'prop-types';
 

@@ -1,5 +1,5 @@
 
-import * as AnimationAction from "./../action/AnimationAction";
+import * as AnimationAction from "./../action";
 
 let initState = {
     positions : {}

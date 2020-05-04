@@ -1,29 +1,14 @@
 
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import Style from './../../css/Style.module.css';
 import Card from './Card';
 
+export default function Deck(){
+    const [cardList, setCardList] = useState([1,2,3,4,5,6,7,8,9,10,]);
 
-export default class Deck extends Component {    
-    
-    constructor(props){
-        super(props);
-        this.onClick = this.onClick.bind(this);
-
-        this.state = {
-            cardList: [1,2,3,4,5,6,7,8,9,10,]
-        }
-    }
-
-    onClick(){
-        
-    }
-
-
-    renderCard(data, index){
+    function DeckCard(data, index){
         let topShift  = index * -0.04  + "rem";
         let leftShift = index * -0.04  + "rem";
-
         return (
             <li class={Style.cardDeckItem} 
             style = {{
@@ -33,17 +18,14 @@ export default class Deck extends Component {
             key={index} >
                 <Card hoverable={false} clickable={false}>{data}</Card>
             </li>
-        );
+        );  
     }
-     
 
-    render() {
-        return (
-            <ul class = {Style.deck}  >
-                {this.state.cardList.map( 
-                    (data, index) => this.renderCard(data, index)  
-                )}    
-            </ul>
-        );
-    }
+    return (
+        <ul class = {Style.deck}  >
+            {cardList.map( 
+                (data, index) => DeckCard(data, index)  
+            )}    
+        </ul>
+    );
 }

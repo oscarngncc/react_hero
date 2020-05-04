@@ -1,5 +1,5 @@
 
-import * as GameStatusAction from './../action/GameStatusAction';
+import * as GameStatusAction from './../action';
 
 /**
  *  time: within range (0,24)

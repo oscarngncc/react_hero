@@ -1,24 +1,20 @@
 
-import React, { Component } from 'react';
-import Modal from 'react-modal';
+import React from 'react';
 import Style from "./../../css/Style.module.css";
-//import "./../../css/Special.css";
+import Modal from 'react-modal';
 
-
-export default class ModalWindow extends Component {
-    render() {
-        return (    
-            <Modal 
-            isOpen={this.props.isOpen}
-            closeTimeoutMS={500} 
-            className={Style.modalWindow}
-            overlayClassName={Style.overlay}
-            ariaHideApp={false}
-            >
-                <button onClick={this.props.unmount}>close</button>
-                {this.props.children}
-            </Modal>
-        )
-    }
+export default function modalWindow(props) {
+    return (    
+        <Modal 
+        isOpen={props.isOpen}
+        closeTimeoutMS={500} 
+        className={Style.modalWindow}
+        overlayClassName={Style.overlay}
+        ariaHideApp={false}
+        >
+            <button onClick={props.unmount}>close</button>
+            {props.children}
+        </Modal>
+    );    
 }
 
