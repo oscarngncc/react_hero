@@ -1,64 +1,73 @@
 
-import React, {Component} from 'react' ;
+import React, { useState, useRef } from 'react' ;
+import {useSpring, animated} from 'react-spring';
+
 import Style from './../../css/Style.module.css';
 
 
 /** 
  *  Card Component, including front side and rear side 
 */
-export class Card extends Component {
+let defaultProps = {
+    clickable: true,
+    hoverable: true,
+}
 
-    state = {
-        name:"Card",
-        content: "frontCard",
-        isFaceDown: false,
-        hoverable: true,
-        clickable: true,
+export default function Card(props=defaultProps){
+
+    const [name, setname] = useState("Card");
+    const [content, setcontent] = useState("Front card")
+    const [isFaceDown, setisFaceDown] = useState(false)
+    const [isHovered, setisHovered] = useState(false)
+    const [clickable, setclickable] = useState(props.clickable)
+    const [hoverable, sethoverable] = useState(props.hoverable)
+    const wrapperRef = useRef(null)
+
+    const spring = useSpring({
+        from: {},
+        to: {
+            transform:  "scale(1.3)",
+            boxShadow: "0 0 0.5rem 0.3rem lightgrey", 
+        },
+        config: { mass: 4, tension: 500, friction: 10 },
+    });
+
+    function onHover(bool){
+        if (hoverable){
+            setisHovered(bool);
+        }
     }
 
-    wrapperRef;
 
-    constructor(props){
-        super(props);
-        this.state.name = props.name;
-        this.wrapperRef = React.createRef();
-        this.onClick = this.onClick.bind(this);
-
-        if (props.isFaceDown !== undefined ){
-            this.state.isFaceDown = props.isFaceDown;
-        }
-        if (props.hoverable !== undefined ){
-            this.state.hoverable = props.hoverable;
-        }
-        if (props.clickable !== undefined ){
-            this.state.clickable = props.clickable;
-        }
-    }
-
-    onClick(){
-        if ( this.state.clickable ){
-            const wrapper = this.wrapperRef.current;
+    function onClick(){
+        if (clickable){
+            const wrapper = wrapperRef.current;
             wrapper.classList.toggle(Style.isFlipped);
         }
     }
 
-
-    render(){
-        var hoverableCard = (this.state.hoverable) ? Style.hoverableCard : "";
-        return (
-        <div class={Style.card} onClick={()=>this.onClick()} >
-            <div class={Style.cardInner} ref = {this.wrapperRef}  >
-                <div class={[ Style.frontCard, hoverableCard ].join(' ')}>
-                    {this.state.content}
-                </div>
-                <div class={[ Style.rearCard, hoverableCard ].join(' ')}>
+    //let hoverableCard = (hoverable) ? Style.hoverableCard: "";
+    return (
+        <div class={Style.card} onClick={()=>onClick()} >
+            <div class={Style.cardInner} ref = {wrapperRef}  >
+                <animated.div 
+                class={[Style.frontCard].join(' ')} 
+                onMouseEnter={() => onHover(true) } 
+                onMouseLeave={() => onHover(false)}
+                style={(isHovered && !isFaceDown) ? spring : {}} 
+                >
+                    {props.children}
+                </animated.div>
+                <animated.div 
+                class={[ Style.rearCard,].join(' ')} 
+                onMouseEnter={() => onHover(true) } 
+                onMouseLeave={() => onHover(false)}
+                style={ (isHovered && isFaceDown) ? spring : {} } 
+                >
                     rearCard
-                </div>
+                </animated.div>
             </div>
         </div>
-        );       
-    }
+    );  
 }
 
-
-export default Card;

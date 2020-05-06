@@ -17,7 +17,6 @@ class HandDraw extends Component {
        this.clickCard = this.clickCard.bind(this);
        this.renderCardListItem = this.renderCardListItem.bind(this);
        this.Dismiss = this.Dismiss.bind(this);
-       this.animateAppear= this.animateAppear.bind(this);
        this.animateToStage = this.animateToStage.bind(this);
        this.cardRefs = [];
 
@@ -28,12 +27,7 @@ class HandDraw extends Component {
        }
    }
 
-   componentDidMount(){
-    for ( let i = 0; i < this.state.cardList.length; i++ ){
-        this.animateAppear(i);
-    }
-   }
-
+   
 
    /**
     * Effect after clicking the card
@@ -53,12 +47,6 @@ class HandDraw extends Component {
                 cardList: newCardList
             }
         });
-   }
-
-
-
-   animateAppear(index){
-       this.cardRefs[index].current.classList.toggle(Style.isInit);
    }
 
 
@@ -140,7 +128,7 @@ class HandDraw extends Component {
             onClick = { () => this.clickCard(index) }
             ref={this.cardRefs[index] }
             key={index}>
-                <Card clickable={false} ></Card>
+                <Card clickable={false} hoverable={true} ></Card>
             </li>
         );
    }

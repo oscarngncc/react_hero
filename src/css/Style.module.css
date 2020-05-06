@@ -14,12 +14,16 @@
   margin: 0;
   padding: 0;
   font-size: 1.6vh;
+  list-style-type: none;
 
 
   /*Global Variable*/
   --card-width: 12rem;
   --card-height: 16rem;
-
+  --stage-height: 36rem;
+  --stage-width: 100rem;
+  --map-row: 4;
+  --map-column: 4;
 }
 
 body {
@@ -33,7 +37,7 @@ body {
   min-width: calc(100vh * 16/9);
   width: 100vw;
   height: 100vh;
-  background-color: rgb(20,20,20);
+  background-color: grey;
   position: relative;
   overflow: hidden; 
 }
@@ -58,13 +62,40 @@ body {
 
 .stage {
   margin: 3rem;
-  height: 35rem;
-  width: 100rem;
-  background-color: brown;
+  height: calc( var(--stage-height) + 1rem);
+  width: var(--stage-width);
   
+  transform: perspective(150rem) rotateX(30deg);
+  box-shadow: 0 12.5px 100px -10px rgba(50, 50, 73, 0.4), 0 10px 10px -10px rgba(50, 50, 73, 0.3);
+  border-radius: 2.0rem;
+  background:  
+  white
+  linear-gradient(rgba(0,0,0, 0.1),rgba(0,0,0, 0.1)) 50% 100%/calc(100% - 1rem) 1rem; 
+  background-repeat: no-repeat;  
   position: relative;
   z-index: 1;
 }
+
+
+.gameMap {
+  height: 95%;
+  width: 100%;
+}
+
+
+.floorUnit {
+  position: relative;
+  float: left; 
+  background-color: lightblue;
+  border-radius: 1rem;
+  border: solid white 0.3rem;
+  box-shadow: 0 12.5px 100px -10px rgba(50, 50, 73, 0.1), 0 10px 10px -10px rgba(50, 50, 73, 0.25);
+  margin: var(--margin-value);
+  height: calc( 100% / var(--map-column) );
+  width: calc(  100% / var(--map-row) );
+}
+
+
 
 
 .player {
@@ -101,7 +132,7 @@ body {
   position: relative;
   width: 100%;
   height: 100%;
-  top: 5rem;
+  top: 3rem;
 
   
   display: flex;
@@ -114,7 +145,6 @@ body {
   overflow: visible;
   position: relative;
   white-space: nowrap;
-  list-style-type: none;
 
   margin-right: 13rem;
   top: 1rem;
@@ -141,7 +171,6 @@ body {
   overflow: visible;
   position: relative;
   white-space: nowrap;
-  list-style-type: none;
   z-index: 2;
 
 }
@@ -226,8 +255,9 @@ body {
 
 
 .frontCard, .rearCard {
-  border: solid 0.2rem darkorange;
-  box-shadow: 0 0 0.3rem 0 darkorange;
+  border: solid 0.4rem gold;
+  box-shadow: 0rem 0 0.5rem 0 lightcoral;
+
   width: 100%;
   height: 100%;
   border-radius: 0.5rem;
@@ -244,8 +274,11 @@ body {
 }
 
 
+
+
+
 .frontCard {
-  background-color: aqua;
+  background-color: moccasin;
 }
 
 .rearCard {
@@ -271,7 +304,6 @@ body {
 }
 
 .appBar li {
-  list-style: none;
   float: left;
   margin: 0.5rem 0.5rem;
   font-size: 1rem;
@@ -286,7 +318,6 @@ body {
 }
 
 .statusBar ul {
-  list-style-type: none;
   text-align:center;
   
   clear: left;
