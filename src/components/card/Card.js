@@ -26,7 +26,7 @@ export default function Card(props=defaultProps){
     const spring = useSpring({
         from: {},
         to: {
-            transform:  "scale(1.3)",
+            transform:  "scale(1.6)",
             boxShadow: "0 0 0.5rem 0.3rem lightgrey", 
         },
         config: { mass: 4, tension: 500, friction: 10 },

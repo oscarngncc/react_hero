@@ -1,11 +1,11 @@
 
 
 import React, { Component } from 'react'
-
 import { connect } from 'react-redux';
-import * as AnimationAction from './../../state/action';
-
 import PropTypes from 'prop-types';
+
+import * as AnimationAction from './../../state/action';
+import Style from './../../css/Style.module.css';
 
 
 class PositionComponent extends Component {
@@ -46,7 +46,7 @@ class PositionComponent extends Component {
     
     render() {
         return (
-            <div ref={this.selector}>{this.props.children}</div>
+            <div class={Style.posComponent} ref={this.selector}>{this.props.children}</div>
         )
     }
 }

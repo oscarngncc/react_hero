@@ -1,8 +1,121 @@
 
-import React, {Component} from 'react' ;
+import React, {useState, useRef, useEffect} from 'react' ;
 import Card from './Card';
 import Style from './../../css/Style.module.css';
-import { connect } from 'react-redux';
+import {useSpring, useTrail, animated} from 'react-spring';
+
+//import { connect } from 'react-redux';
+
+
+export default function HandDraw(props){
+    const [cardList, setcardList] = useState([1,2,3,4,5,6, 7]);
+    const cardRefs = useRef([]);
+    const [isProtrait, setisProtrait] = useState(window.innerHeight / window.innerWidth > 1 ? true : false);
+
+    useEffect(() => {
+        window.addEventListener("resize", ()=>{  setisProtrait(window.innerHeight / window.innerWidth > 1 ? true : false)    });
+        return () => {
+            window.removeEventListener("resize", ()=>{} );
+        }
+    });
+
+
+    const [initTrail, setInitTrail] = useTrail(cardList.length, function(){
+        return {
+            from: { 
+                transform: "translate(-10rem, 30rem)",
+                opacity: 0.6, 
+            },
+            to: {
+                transform: "translate(0, 0)", 
+                opacity: 1.0,
+            },
+            config:  { mass: 2, tension: 600, friction: 55 }
+        };
+    });
+
+
+    function idleCardPosition(index){
+
+        if (isProtrait){
+            const layer = 2; 
+            const cardsPerLayer = 4;  
+           
+            let distance = ( -4 / cardList.length).toFixed(1).toString();
+            let dynamicMargin = "0rem " + distance + "rem";
+            let topDist="";
+
+    
+            if (index < cardsPerLayer ){
+                topDist="15rem";
+            }
+            else { 
+                topDist="3rem";
+            }
+
+            return {
+                top: topDist,
+                margin: dynamicMargin,
+            };
+        }
+
+
+        //Helper 
+        const middle = Math.floor(cardList.length / 2);
+        const rotateDegree = 2;
+        const topDistance = 0.85;
+        
+        let distance = ( -3 / cardList.length).toFixed(1).toString();
+        
+        let dynamicMargin = "0rem " + distance + "rem";
+        let elevation = "";
+        let topDist = "";
+        
+        if ( index === middle ){
+            elevation = "rotate("+ rotateDegree/2 +"deg)"
+            topDist =  (topDistance / 2) + "rem";
+        }
+        else { 
+            elevation = "rotate(" + (-(middle-index) * rotateDegree).toString() + "deg)";
+            topDist = ( topDistance * Math.abs((middle-index))).toString()  + "rem";
+        }
+
+
+        return {
+            margin: dynamicMargin,
+            transform: elevation,
+            top: topDist,
+        };
+    }
+
+
+    function  renderCardListItem(data, index ) {
+        return (
+            <li 
+            class = {Style.cardListItem}
+            style = {{...idleCardPosition(index)}} 
+            key={index}>
+                <animated.div style={initTrail[index]}>
+                    <Card clickable={false} hoverable={true} ></Card>
+                </animated.div>
+            </li>
+        );
+   }
+
+
+   return (
+    <ul class={Style.handDraw}>
+        {cardList.map( 
+            (data, index) => renderCardListItem(data, index)  
+        )}
+    </ul>
+    );
+    
+}
+
+
+
+/************** 
 
 class HandDraw extends Component {
 
@@ -29,10 +142,7 @@ class HandDraw extends Component {
 
    
 
-   /**
-    * Effect after clicking the card
-    * @param {*} index 
-    */
+   
    clickCard(index){
         //this.animateToStage(index);    
         this.Dismiss(index);  
@@ -51,10 +161,7 @@ class HandDraw extends Component {
 
 
 
-   /**
-    * Moving Card from X to stage
-    * @param {*} index 
-    */
+   
    animateToStage(index){
         let endCoord = this.props.animationStatus.positions["Stage"];
 
@@ -83,12 +190,6 @@ class HandDraw extends Component {
    }
 
 
-   
-   /**
-    * Function for rendering each individual card item, also setting things up, including refs
-    * @param {*} data 
-    * @param {*} index - index of the card
-    */
    renderCardListItem(data, index ) {
 
         // curve equation: y = -0.005x^2
@@ -153,3 +254,4 @@ function mapStateToProps(state){
 }
 
 export default connect(mapStateToProps)(HandDraw);
+*/

@@ -2,28 +2,44 @@ import React from 'react';
 import Style from './css/Style.module.css';
 //import Player from './components/game/Player';
 import Stage from './components/game/Stage';
+//import EntityStage from './components/game/EntityStage';
 import HandDraw from './components/card/HandDraw';
-import Deck from './components/card/Deck';
+//import Deck from './components/card/Deck';
 import StatusBar from './components/ui/CharacterStatusBar';
 import AppBar from './components/ui/AppBar';
 import PositionalComponent from './components/misc/PositionComponent';
-
+import GameBackGround from './components/ui/GameBackGround';
 
 function App() {
   return (
     <div className= {Style.app} align="center">
-      <div className= {Style.game} align="center" >
+      <GameBackGround align="center">
         <AppBar/>
-        <div className={Style.backgroundIMG}  ></div>
-        <PositionalComponent positionKey="Stage"><Stage/></PositionalComponent>
+        <PositionalComponent positionKey="Stage"></PositionalComponent><Stage/>
         <StatusBar />
         <div className={Style.cardSection} align="center">
-        <PositionalComponent positionKey="Deck"><Deck/></PositionalComponent>
           <HandDraw/>
         </div>
-      </div>
+      </GameBackGround>
     </div>
   );
 }
+
+/*
+function App() {
+  return (
+    <div className= {Style.app} align="center">
+      <GameBackGround align="center">
+        <AppBar/>
+        <PositionalComponent positionKey="Stage"><Stage/></PositionalComponent>
+        <StatusBar />
+        <div className={Style.cardSection} align="center">
+          <HandDraw/>
+        </div>
+      </GameBackGround>
+    </div>
+  );
+}
+*/
 
 export default App;

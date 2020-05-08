@@ -15,8 +15,14 @@ export default function Deck(){
         onRest: () => onClickCallBack(),
     });
 
+    const initSpring = useSpring({
+        from: {top: "10rem"},
+        to: {top: "0rem"},
+        config: { mass: 5, tension: 250, friction: 25 },
+    });
+
     function onClickCallBack(){
-        if (isClick == true){
+        if (isClick === true){
             let newCardList = cardList;
             newCardList.pop();
             setCardList(newCardList);
@@ -26,7 +32,7 @@ export default function Deck(){
     
 
     function DeckCard(data, index){
-        let spring = ( isClick && index == cardList.length-1) ? downDismissSpring : {};
+        let spring = ( isClick && index === cardList.length-1) ? downDismissSpring : {};
         let topShift  = index * -0.04  + "rem";
         let leftShift = index * -0.04  + "rem";
         return (
@@ -35,6 +41,7 @@ export default function Deck(){
             style = {{
                 top: topShift,
                 left: leftShift,
+                ...initSpring,
                 ...spring,
             }}
             key={index} >

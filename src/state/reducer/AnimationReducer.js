@@ -2,7 +2,7 @@
 import * as AnimationAction from "./../action";
 
 let initState = {
-    positions : {}
+    positions : undefined
 };
 
 
@@ -12,9 +12,9 @@ function updateObject(old, newObj){
 
 
 function savePositions(state, action){
-    let newPositions = state.positions;
-    
-    newPositions[action.key] = {
+    let newPositions = (state.positions !== undefined) ? state.positions: {};
+
+    newPositions[ action.key ] = {
         xPos: action.xPos,
         yPos: action.yPos,
     }
