@@ -14,9 +14,9 @@ function App() {
   return (
     <div className= {Style.app} align="center">
       <GameBackGround align="center">
+        <StatusBar/>
         <AppBar/>
         <PositionalComponent positionKey="Stage"></PositionalComponent><Stage/>
-        <StatusBar />
         <div className={Style.cardSection} align="center">
           <HandDraw/>
         </div>

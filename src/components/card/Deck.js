@@ -44,6 +44,7 @@ export default function Deck(){
                 ...initSpring,
                 ...spring,
             }}
+            draggable={true}
             key={index} >
                 <Card hoverable={false} clickable={false}>{index}</Card>
             </animated.li>

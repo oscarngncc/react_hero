@@ -19,28 +19,21 @@ export default function Card(props=defaultProps){
     const [content, setcontent] = useState("Front card")
     const [isFaceDown, setisFaceDown] = useState(false)
     const [isHovered, setisHovered] = useState(false)
-    const [clickable, setclickable] = useState(props.clickable)
-    const [hoverable, sethoverable] = useState(props.hoverable)
     const wrapperRef = useRef(null)
 
     const spring = useSpring({
         from: {},
         to: {
-            transform:  "scale(1.6)",
+            transform:  "scale(1.4)",
             boxShadow: "0 0 0.5rem 0.3rem lightgrey", 
         },
         config: { mass: 4, tension: 500, friction: 10 },
     });
 
-    function onHover(bool){
-        if (hoverable){
-            setisHovered(bool);
-        }
-    }
 
 
     function onClick(){
-        if (clickable){
+        if (props.clickable){
             const wrapper = wrapperRef.current;
             wrapper.classList.toggle(Style.isFlipped);
         }
@@ -52,17 +45,17 @@ export default function Card(props=defaultProps){
             <div class={Style.cardInner} ref = {wrapperRef}  >
                 <animated.div 
                 class={[Style.frontCard].join(' ')} 
-                onMouseEnter={() => onHover(true) } 
-                onMouseLeave={() => onHover(false)}
-                style={(isHovered && !isFaceDown) ? spring : {}} 
+                onMouseEnter={() => setisHovered(props.hoverable) } 
+                onMouseLeave={() => setisHovered(false)}
+                style={(isHovered && props.hoverable && !isFaceDown) ? spring : {}} 
                 >
                     {props.children}
                 </animated.div>
                 <animated.div 
                 class={[ Style.rearCard,].join(' ')} 
-                onMouseEnter={() => onHover(true) } 
-                onMouseLeave={() => onHover(false)}
-                style={ (isHovered && isFaceDown) ? spring : {} } 
+                onMouseEnter={() => setisHovered(props.hoverable) } 
+                onMouseLeave={() => setisHovered(false)}
+                style={ (isHovered && props.hoverable && isFaceDown) ? spring : {} } 
                 >
                     rearCard
                 </animated.div>

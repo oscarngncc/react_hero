@@ -8,7 +8,7 @@ import Style from './../../css/Style.module.css';
 export default function GameBackground(props){
     const particleNum = 30;
     const particleArr = new Array(particleNum).fill(0);
-    const [ bgChoice, setbgChoice] = useState(0);
+    const [ bgChoice, setbgChoice] = useState(1);
 
 
     const snowSprings = useSprings(particleNum, particleArr.map( function(item){ 
