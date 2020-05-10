@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import * as AnimationAction from './../../state/action';
+import * as Action from './../../state/action/action';
 import Style from './../../css/Style.module.css';
 
 
@@ -56,7 +56,7 @@ class PositionComponent extends Component {
 function mapDispatchToProps(dispatch){
     return {
         savePosition: (key, xPos, yPos) => {
-            dispatch(AnimationAction.saveEndPointPosition(key, xPos, yPos) )
+            dispatch(Action.PositionAction.saveEndPointPosition(key, xPos, yPos) )
         },
     }
 }

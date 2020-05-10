@@ -1,5 +1,5 @@
 
-import * as AnimationAction from "./../action";
+import * as Action from "../action/action";
 
 let initState = {
     positions : undefined
@@ -29,7 +29,7 @@ function savePositions(state, action){
 
 export default function animationReducer(state=initState, action){
     switch (action.type){
-        case AnimationAction.SAVE_ENDPOINT_POS:
+        case Action.PositionAction.SAVE_ENDPOINT_POS:
             return savePositions(state, action);
         default:
             

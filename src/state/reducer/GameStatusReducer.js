@@ -1,5 +1,5 @@
 
-import * as GameStatusAction from './../action';
+import * as Action from '../action/action';
 
 /**
  *  time: within range (0,24)
@@ -18,6 +18,9 @@ function updateObject(old, newObj){
 }
 
 
+
+
+
 function incrementHealth(state, action){
     let newHP = Math.max(0, state.health + action.value );
     return updateObject( state, {
@@ -25,6 +28,8 @@ function incrementHealth(state, action){
         health: newHP,
     });
 }
+
+
 
 function incrementMoney(state, action){
     let newMoney = Math.max(0, state.money + action.value);
@@ -49,11 +54,11 @@ function incrementTime(state, action){
 
 export default function gameStatusReducer( state = initState, action ){
     switch ( action.type ){
-        case GameStatusAction.INCREMENT_HEALTH:
+        case Action.GameStatusAction.INCREMENT_HEALTH:
             return incrementHealth(state, action);
-        case GameStatusAction.INCREMENT_MONEY:
+        case Action.GameStatusAction.INCREMENT_MONEY:
             return incrementMoney(state, action);
-        case GameStatusAction.INCREMENT_TIME:
+        case Action.GameStatusAction.INCREMENT_TIME:
             return incrementTime(state, action);     
         default:
             return state;  
