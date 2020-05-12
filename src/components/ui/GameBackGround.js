@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {useSprings, animated} from 'react-spring';
 
 
@@ -9,7 +9,7 @@ export default function GameBackground(props){
     const particleNum = 30;
     const particleArr = new Array(particleNum).fill(0);
     const [ bgChoice, setbgChoice] = useState(1);
-
+    
 
     const snowSprings = useSprings(particleNum, particleArr.map( function(item){ 
         let xStart = Math.floor(Math.random() * 100);
@@ -44,7 +44,7 @@ export default function GameBackground(props){
     }));
 
 
-    const laserSprings = useSprings(particleNum, particleArr.map( function(item, index){ 
+    const [laserSprings, setLaser, stopLaser] = useSprings(particleNum, function(index){ 
         let delay = Math.floor(Math.random() * 4000);
         let xStart = Math.floor(Math.random() * 100);
         xStart = xStart.toString() + "vw";
@@ -73,7 +73,7 @@ export default function GameBackground(props){
             reset: true,
             delay: delay,
         });
-    }));
+    });
 
 
     const Option = [
@@ -81,6 +81,9 @@ export default function GameBackground(props){
         {particle: Style.laserParticle, springs: laserSprings },
         {particle: {}, springs: {}},
     ];
+
+
+    
 
 
     function renderParticle(index){

@@ -1,11 +1,11 @@
 
 
 
-import * as GameStatusAction from './GameMapAction';
-import * as GameMapAction from './GameMapAction';
+import * as GameStatusAction from './GameStatusAction';
+import * as StageAction from './StageAction';
 import * as PositionAction from './PositionAction';
 
-export {GameMapAction};
+export {StageAction};
 export {GameStatusAction};
 export {PositionAction};
 

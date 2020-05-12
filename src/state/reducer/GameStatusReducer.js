@@ -5,12 +5,16 @@ import * as Action from '../action/action';
  *  time: within range (0,24)
  */
 let initState = {
+    startGame: false,
+    isBattle: false,
+
+    health: 20,
+    healthLimit: 20,
     money: 0,
     time: 6,
     day: 1,
-    health: 20,
-    healthLimit: 20,
 }
+
 
 
 function updateObject(old, newObj){
@@ -18,6 +22,21 @@ function updateObject(old, newObj){
 }
 
 
+
+function startGame(state, action){
+    return updateObject( state, {
+        ...state,
+        startGame: action.value,
+    });
+}
+
+
+function startBattle(state, action){
+    return updateObject( state, {
+        ...state,
+        isBattle: action.value,
+    });
+}
 
 
 
@@ -54,6 +73,10 @@ function incrementTime(state, action){
 
 export default function gameStatusReducer( state = initState, action ){
     switch ( action.type ){
+        case Action.GameStatusAction.START_GAME:
+            return startGame(state, action);
+        case Action.GameStatusAction.START_BATTLE:
+            return startBattle(state, action);
         case Action.GameStatusAction.INCREMENT_HEALTH:
             return incrementHealth(state, action);
         case Action.GameStatusAction.INCREMENT_MONEY:

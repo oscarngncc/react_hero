@@ -16,6 +16,7 @@
   font-size: 1.6vmin;
   list-style-type: none;
   font-family: Arial, Helvetica, sans-serif;
+  user-select: none;
 
   /*Global Variable*/
   --bar-height: 7vmin;
@@ -88,18 +89,18 @@ body {
 
 
 .gameMap {
+  position: relative;
   height: 100%;
   width: 100%;
+  z-index: 1;
   
-  transform: perspective(150rem) rotateX(20deg);
+  transform: perspective(150rem) rotateX(10deg);
   box-shadow: 0 12.5px 100px -10px rgba(50, 50, 73, 0.4), 0 10px 10px -10px rgba(50, 50, 73, 0.3);
   border-radius: 2.0rem;
   background:  
   white
   linear-gradient(rgba(0,0,0, 0.1),rgba(0,0,0, 0.1)) 50% 100%/calc(100% - 1rem) 1rem; 
   background-repeat: no-repeat;  
-  position: relative;
-  z-index: 1;
 }
 
 
@@ -120,6 +121,12 @@ body {
   box-shadow: 0 12.5px 100px -10px rgba(50, 50, 73, 0.1), 0 10px 10px -10px rgba(50, 50, 73, 0.25);
   height: calc( 100% / var(--map-row) );
   width: calc(  100% / var(--map-column) );
+}
+
+.floorUnit * {
+  position: relative;
+  top: 25%;
+  bottom: 25%;
 }
 
 
@@ -279,6 +286,24 @@ body {
 /*
 ************* UI-Related-Stuff *******************
 */
+
+
+.mainMenu {
+  position: absolute;
+  top: 25%;
+  right: 25%;
+  left: 25%;
+  bottom: 25%;
+}
+
+.mainMenuItem {
+  margin: 1rem;
+  color: white;
+  font-size: 3.5rem;
+  
+}
+
+
 .appBar {
   color: white;
   float: right;
@@ -369,5 +394,13 @@ body {
 :global(.ReactModal__Overlay--before-close){
   transform: translateY(-10rem);
   opacity: 0;
+}
+
+.clickableCircle {
+  height: 3rem;
+  width: 3rem;
+  background-color: rgba(240, 240, 240, 0.8);
+  border-radius: 50%;
+  transform: rotateX(-50deg);
 }
 
