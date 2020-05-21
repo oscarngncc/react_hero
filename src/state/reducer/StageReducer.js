@@ -9,7 +9,7 @@ let initState = {
     gameMapCol: -1,
 
     battleMap : null,
-    playerBattleMapCoord: {x: 0, y: 0},
+    playerBattleMapCoord: {x: 1, y: 1},
     battleMapRow: -1,
     battleMapCol: -1,
 
@@ -81,7 +81,9 @@ function generateGameMap(state, action){
 function generateBattleMap(state, action){
     return updateObject( state, {
         ...state,
-        battleMap: action.map
+        battleMap: action.map,
+        battleMapRow: action.row,
+        battleMapCol: action.col
     });
 }
 

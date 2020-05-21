@@ -1,6 +1,7 @@
 
 export const EMPTY = 0;
 export const PLAYER = 1;
+export const ENEMY = 2;
 
 export const empty = {
     key: EMPTY,
@@ -10,6 +11,11 @@ export const empty = {
 
 export const player = {
     key: PLAYER,
+    image: "Player.png",
+}
+
+export const enemy = {
+    key: ENEMY,
     image: "",
 }
 
@@ -24,5 +30,9 @@ function convertObject(arr){
 }
 
 
-let Event = convertObject( [empty, player] );
+let Event = convertObject( [
+    empty, 
+    player, 
+    enemy,
+]);
 export default Event;

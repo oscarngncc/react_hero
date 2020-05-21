@@ -83,11 +83,11 @@ export default function HandDraw(props){
 
             if (index < cardsPerLayer ){
                 //topDist="15rem";
-                topDist="15rem";
+                topDist="0rem";
             }
             else { 
                 //topDist="5rem";
-                topDist="5rem";
+                topDist="-7.5rem";
             }
 
             return {

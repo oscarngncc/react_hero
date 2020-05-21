@@ -1,6 +1,7 @@
 
 import makeActionCreator from './actionCreator';
 import * as Event from './../../data/event/Event';
+import * as Tile from '../../data/tile/Tile';
 
 /**
  *  Game Map Related
@@ -85,7 +86,6 @@ export function generateGamePath(pathLength, splitChanceNum ){
     }
   }
 
-  console.table(gameMap);
   return {
     type: GENERATE_GAMEMAP,
     map: gameMap,
@@ -101,7 +101,7 @@ export function generateGamePath(pathLength, splitChanceNum ){
  * Action creator for Generate Battle Arena 
  */
 export function generateBattleMap(){
-  let battleMap = Array(stageRow).fill().map(() => Array(stageColumn).fill(0));
+  let battleMap = Array(stageRow).fill().map(() => Array(stageColumn).fill( Tile.NORMAL_TILE ));
   
   console.table(battleMap);
   return {
@@ -124,13 +124,15 @@ export function generateEvent(pathLength){
   let rows = stageRow;
   let cols = pathLength;
   let eventsInMap = Array(rows).fill().map(() => Array(cols).fill( Event.EMPTY  ));
+
+  //Debug
+  eventsInMap[2][2] = Event.ENEMY;
+
   return {
     type: GENERATE_EVENT,
     map: eventsInMap,
   }
 }
-
-
 
 
 export const movePlayerInMap = makeActionCreator(MOVE_PLAYER_GAMEMAP, 'Coord');

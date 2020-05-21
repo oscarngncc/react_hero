@@ -2,7 +2,8 @@
 import React from 'react';
 import Style from "./../../css/Style.module.css";
 
-import { useSelector } from 'react-redux';
+import { useSelector} from 'react-redux';
+import { useSpring , animated } from 'react-spring';
 
 
 export default function CharacterStatusBar(){
@@ -12,13 +13,23 @@ export default function CharacterStatusBar(){
     const Money = useSelector(state => state.game.money);
     const Hour = useSelector(state => state.game.time);
     
+
+    
+    let healthPercent = Math.floor(HP/MaxHP * 100).toString() + "%";
+    const healthBarSpring = useSpring({
+        width: healthPercent,
+    });
+
+    
     return (
     <div class={Style.statusBar} >
-        <ul>
-            <li class={Style.statusBarItem}>HP: {Math.round(HP)}/{Math.round(MaxHP)}</li>
-            <li class={Style.statusBarItem}>Money: {Math.round(Money)}</li>
-            <li class={Style.statusBarItem}>Time: {Math.round(Hour) + ": 00"}</li>              
-        </ul>
+       <div class={Style.statusParallelogram} >
+            <p>Money: {Math.round(Money)}</p>
+            <p>Some Filler</p>
+       </div>
+       <div class={Style.healthBarParallelogram} >
+           <animated.div class={Style.healthBarFill} style={healthBarSpring} ></animated.div>
+        </div>  
     </div>
     );
 }

@@ -8,7 +8,7 @@ import Style from './../../css/Style.module.css';
 export default function GameBackground(props){
     const particleNum = 30;
     const particleArr = new Array(particleNum).fill(0);
-    const [ bgChoice, setbgChoice] = useState(1);
+    const [ bgChoice, setbgChoice] = useState(0);
     
 
     const snowSprings = useSprings(particleNum, particleArr.map( function(item){ 
@@ -47,23 +47,23 @@ export default function GameBackground(props){
     const [laserSprings, setLaser, stopLaser] = useSprings(particleNum, function(index){ 
         let delay = Math.floor(Math.random() * 4000);
         let xStart = Math.floor(Math.random() * 100);
-        xStart = xStart.toString() + "vw";
+        xStart = "translateX(" + xStart.toString() + "vw)";
         
         return({
             from: {
                 opacity: 0,
-                left: xStart,
+                transform: xStart,
                 width: "20rem",
             },
             to: async next => {
                 while(true){
                     let xEnd = Math.floor(Math.random() * 100);
                     let width = Math.floor(Math.random() * 8 );
-                    xEnd = xEnd.toString() + "vw";
+                    xEnd = "translateX(" + xEnd.toString() + "vw)";
                     width = width.toString() + "rem";
 
                     await next({
-                        left: xEnd,
+                        transform: xEnd,
                         opacity: (index%6===0) ? 0.1 : 0,
                         width: width,
                     });

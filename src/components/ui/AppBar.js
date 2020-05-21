@@ -9,7 +9,8 @@ import Style from "./../../css/Style.module.css";
 export default function AppBar(props){
     
 
-    const contents = ["News", "Status", "Setting"];
+    //const contents = ["News", "Status", "Setting"];
+    const contents = ["Setting"];
     const [areItemsOn, setItemsOn] = useState(new Array(contents.length).fill(false));
     const [areItemsHover, setItemsHover] = useState(new Array(contents.length).fill(false));
     
