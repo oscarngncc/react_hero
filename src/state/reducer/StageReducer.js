@@ -14,7 +14,14 @@ let initState = {
     battleMapCol: -1,
 
     eventInMap: null,
-    entityInMap: null,
+    entityInMap: {
+        /** example:
+            12 : {
+                type: ...,
+                Coord: { x: 0, y: 0}
+            }
+        */
+    },
 }
 
 
@@ -83,7 +90,21 @@ function generateBattleMap(state, action){
         ...state,
         battleMap: action.map,
         battleMapRow: action.row,
-        battleMapCol: action.col
+        battleMapCol: action.col,
+        playerBattleMapCoord: {x: 1, y: 1},
+    });
+}
+
+
+
+/**
+ * Generate Enemies
+ */
+function generateEntitiesInStage(state, action){    
+    let EntityMap = JSON.parse(JSON.stringify( action.level.entities ));
+    return updateObject( state, {
+        ...state,
+        entityInMap: EntityMap,
     });
 }
 
@@ -112,6 +133,8 @@ export default function StageReducer(state = initState, action){
             return generateGameMap(state, action);
         case Action.StageAction.GENERATE_BATTLEMAP:
             return generateBattleMap(state, action);
+        case Action.StageAction.GENERATE_LEVEL_BATTLE:
+            return generateEntitiesInStage(state, action);
         case Action.StageAction.MOVE_PLAYER_GAMEMAP:
             return movePlayer(state, action, true);
         case Action.StageAction.MOVE_PLAYER_BATTLEMAP:

@@ -2,7 +2,7 @@
 
 import React, {useState, useRef} from 'react';
 
-import {useSpring, useChain, animated} from 'react-spring';
+import {useSpring, animated} from 'react-spring';
 import Style from './../../css/Style.module.css';
 
 export default function ClickableCircle(props) {

@@ -5,6 +5,7 @@ import Draggable from 'react-draggable';
 
 import Card from './Card';
 import Style from './../../css/Style.module.css';
+import { useSelector } from 'react-redux';
 
 
 //import { connect } from 'react-redux';
@@ -16,8 +17,7 @@ export default function HandDraw(props){
     const noDragIndex = -1;
 
 
-    //const cardRefs = useRef([]);
-    const [cardList, setcardList] = useState([1,2,3,4,5,6,7,8]);
+    const cardList = useSelector(state => state.card.cardList);
     const [dragIndex, setDragIndex] = useState(noDragIndex);
     const [isProtrait, setisProtrait] = useState(window.innerHeight / window.innerWidth > 1 ? true : false);
 
@@ -57,6 +57,7 @@ export default function HandDraw(props){
     }
 
 
+
     function onDragEnd(data){
         setDragIndex(-1);
     }
@@ -81,14 +82,17 @@ export default function HandDraw(props){
             let dynamicMargin = "0rem " + distance + "rem";
             let topDist="";
 
-            if (index < cardsPerLayer ){
-                //topDist="15rem";
-                topDist="0rem";
+            if (cardList.length <= cardsPerLayer ){
+                topDist="-12rem";
+            } else {
+                if (index < cardsPerLayer ){
+                    topDist="0rem";
+                }
+                else { 
+                    topDist="-7.5rem";
+                }
             }
-            else { 
-                //topDist="5rem";
-                topDist="-7.5rem";
-            }
+
 
             return {
                 top: topDist,
@@ -146,7 +150,7 @@ export default function HandDraw(props){
                     onStop={(_event, data) => onDragEnd(data)}
                     >
                         <div>
-                            <Card  clickable={false} hoverable={hoverable} ></Card>
+                            <Card clickable={true} hoverable={hoverable} card={cardList[index] }  ></Card>
                         </div>
                     </Draggable>
                 </animated.div>

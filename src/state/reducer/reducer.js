@@ -1,11 +1,12 @@
 
+import { combineReducers } from 'redux';
 
 import GameStatusReducer from './GameStatusReducer';
-import PositionReducer from './PositionReducer';
+//import PositionReducer from './PositionReducer';
 import StageReducer from './StageReducer';
+import CardReducer from './CardReducer';
 
 
-import { combineReducers } from 'redux';
 
 
 /**
@@ -14,7 +15,8 @@ import { combineReducers } from 'redux';
 let reducer = combineReducers({
     game: GameStatusReducer,
     map: StageReducer,
-    pos: PositionReducer,
+    card: CardReducer,
+    //pos: PositionReducer,
 });
 
 export default reducer;

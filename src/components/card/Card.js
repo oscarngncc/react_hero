@@ -1,8 +1,9 @@
 
 import React, { useState, useRef } from 'react' ;
 import {useSpring, animated} from 'react-spring';
-
+import CardData from './../../data/card/Card';
 import Style from './../../css/Style.module.css';
+import { useDispatch } from 'react-redux';
 
 
 /** 
@@ -11,15 +12,17 @@ import Style from './../../css/Style.module.css';
 let defaultProps = {
     clickable: true,
     hoverable: true,
+    card: undefined
 }
+
 
 export default function Card(props=defaultProps){
 
-    const [name, setname] = useState("Card");
-    const [content, setcontent] = useState("Front card")
     const [isFaceDown, setisFaceDown] = useState(false)
     const [isHovered, setisHovered] = useState(false)
-    const wrapperRef = useRef(null)
+    const Card = CardData[props.card];
+    const wrapperRef = useRef(null);
+    let dispatch = useDispatch();
 
     const spring = useSpring({
         from: {},
@@ -31,31 +34,50 @@ export default function Card(props=defaultProps){
     });
 
 
+    function flipCard(){
+        const wrapper = wrapperRef.current;
+        wrapper.classList.toggle(Style.isFlipped);
+        setisFaceDown(!isFaceDown);
+    }
 
-    function onClick(){
-        if (props.clickable){
-            const wrapper = wrapperRef.current;
-            wrapper.classList.toggle(Style.isFlipped);
+
+    function runCardEffect(){
+        for (var action in Card.effect ){
+            dispatch( Card.effect[action] );
         }
     }
 
+
+    function onClick(){
+        runCardEffect();
+
+        /*
+        if (props.clickable){
+           flipCard();
+        }
+        */
+    }
+
+
+
     //let hoverableCard = (hoverable) ? Style.hoverableCard: "";
     return (
-        <div class={Style.card} onClick={()=>onClick()} >
+        <div class={Style.card} 
+            onClick={()=>onClick()} 
+            onMouseEnter={() => setisHovered(props.hoverable) } 
+            onMouseLeave={() => setisHovered(false)}
+        >
             <div class={Style.cardInner} ref = {wrapperRef}  >
                 <animated.div 
                 class={[Style.frontCard].join(' ')} 
-                onMouseEnter={() => setisHovered(props.hoverable) } 
-                onMouseLeave={() => setisHovered(false)}
                 style={(isHovered && props.hoverable && !isFaceDown) ? spring : {}} 
                 >
-                    {props.children}
+                    {Card.key}
                 </animated.div>
+                
                 <animated.div 
                 class={[ Style.rearCard,].join(' ')} 
-                onMouseEnter={() => setisHovered(props.hoverable) } 
-                onMouseLeave={() => setisHovered(false)}
-                style={ (isHovered && props.hoverable && isFaceDown) ? spring : {} } 
+                style={{}} 
                 >
                     rearCard
                 </animated.div>

@@ -1,18 +1,23 @@
 
 import makeActionCreator from './actionCreator';
 import * as Event from './../../data/event/Event';
-import * as Tile from '../../data/tile/Tile';
+import * as Tile from './../../data/tile/Tile';
+import * as Entity from './../../data/entity/Entity';
+import * as Level from '../../data/level/Level';
 
 /**
  *  Game Map Related
  */
 export const GENERATE_GAMEMAP = "generateGameMap";
 export const GENERATE_BATTLEMAP = "generateBattleMap";
+export const GENERATE_EVENT = "generateEvent";
+export const GENERATE_LEVEL_BATTLE = "generateLevelInBattle";
 
 export const MOVE_PLAYER_GAMEMAP = "movePlayerInMap";
 export const MOVE_PLAYER_BATTLEMAP = "movePlayerInBattle";
 
-export const GENERATE_EVENT = "generateEvent";
+
+
 
 export const LEFT = "left";
 export const RIGHT = "right";
@@ -31,7 +36,6 @@ const stageColumn = 5;
  * @param {number} splitChanceNum the maximum number of an additional path besides the block be added
  */
 export function generateGamePath(pathLength, splitChanceNum ){
-  
   //[row][column] or [y][x]
   let rows = stageRow;
   let columns = pathLength;
@@ -98,6 +102,28 @@ export function generateGamePath(pathLength, splitChanceNum ){
 
 
 /**
+ * action creator for generating random events for gameMap
+ * Note: It doesn't initialize the Player, the player will be initialized in reducer instead
+ * @param {number} pathLength length of path, should be the same for generateGamePath
+ * @return Action containing 2D array of randomized events
+ */
+export function generateEvent(pathLength){
+  let rows = stageRow;
+  let cols = pathLength;
+  let eventsInMap = Array(rows).fill().map(() => Array(cols).fill( Event.EMPTY  ));
+
+  //Debug
+  eventsInMap[2][2] = Event.ENEMY;
+
+  return {
+    type: GENERATE_EVENT,
+    map: eventsInMap,
+  }
+}
+
+
+
+/**
  * Action creator for Generate Battle Arena 
  */
 export function generateBattleMap(){
@@ -115,22 +141,12 @@ export function generateBattleMap(){
 
 
 /**
- * action creator for generating random events for gameMap
- * Note: It doesn't initialize the Player, the player will be initialized in reducer instead
- * @param {number} pathLength length of path, should be the same for generateGamePath
- * @return Action containing 2D array of randomized events
+ * Action creator for Generating Level in Battle Map
  */
-export function generateEvent(pathLength){
-  let rows = stageRow;
-  let cols = pathLength;
-  let eventsInMap = Array(rows).fill().map(() => Array(cols).fill( Event.EMPTY  ));
-
-  //Debug
-  eventsInMap[2][2] = Event.ENEMY;
-
+export function generateLevelInBattle(){
   return {
-    type: GENERATE_EVENT,
-    map: eventsInMap,
+    type: GENERATE_LEVEL_BATTLE,
+    level: Level.base_1,
   }
 }
 

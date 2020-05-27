@@ -1,4 +1,4 @@
-import React, {useState, Fragment} from 'react';
+import React, {Fragment} from 'react';
 import { useSelector } from 'react-redux';
 
 import Style from './css/Style.module.css';
@@ -17,8 +17,6 @@ function App() {
   let isBattle = useSelector(state => state.game.isBattle);
   
   //return (<div className={Style.game}></div>);
-
-
   
   return (
     <div className={Style.app} align="center">

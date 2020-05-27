@@ -10,6 +10,7 @@ import * as Event from './../../data/event/Event';
 import ClickableCircle from './../ui/ClickableCircle';
 import Player from './../game/Player';
 import EnemyInMap from './../game/EntityInMap';
+import Entity from './Entity';
 
 
 
@@ -28,7 +29,9 @@ export default function Stage(props){
     const eventInMap = useSelector(state => state.map.eventInMap );
     const playerGameCoord = useSelector(state => state.map.playerGameMapCoord);
     const playerBattleCoord = useSelector( state => state.map.playerBattleMapCoord);
-    
+    const entitiesBattleCoords = useSelector( state => state.map.entityInMap);
+    const BattleSteps = useSelector(state => state.game.steps);
+
 
     //Placeholder, shouldn't be in use
     const defaultMap = [    
@@ -66,6 +69,7 @@ export default function Stage(props){
         to: { transform: "translateX(0rem)"},
         config:  { mass: 5, tension: 400, friction: 60 },
     });
+    
     const initTrailRef = useRef();
     const initTrail = useTrail( totalLen, {
        from: { transform: "translateY(-150rem)"},
@@ -73,6 +77,7 @@ export default function Stage(props){
        config:  { mass: 4, tension: 2000, friction: 140 },
        delay: 600,
     });
+
     useChain([initMapRef, initTrailRef]);
 
 
@@ -120,6 +125,22 @@ export default function Stage(props){
         }
         return true;
     }
+
+    /**
+     * Based on row/column, check if entity exists on that pane
+     * @param {number} row 
+     * @param {number} column 
+     * @returns {string} unique key of the entity in BattleMap, null otherwise
+     */
+    function checkEntityCoord(row, column){
+        for (let key in entitiesBattleCoords ){
+            if ( entitiesBattleCoords[key]["Coord"].y === row && entitiesBattleCoords[key]["Coord"].x === column){
+                return key;
+            }
+        }
+        return null;
+    }
+
     
 
     
@@ -136,14 +157,15 @@ export default function Stage(props){
 
     /**
      * Move the Player in Map, usable for both map and battle
-     * @param {*} row 
-     * @param {*} column 
+     * @param {number} row 
+     * @param {number} column 
      */
     function movePlayer(row, column){
         if ( isBattle ){
             let coord = { x: column, y: row };
             let move = Action.StageAction.movePlayerInBattle(coord);
             dispatch(move);
+            dispatch(Action.GameStatusAction.incrementStep(-1));
         }
         else {
             let coord = {  x: getFullColumnFromPart(column), y: row,};
@@ -154,6 +176,7 @@ export default function Stage(props){
             dispatch(move);
         }
     }
+
 
 
 
@@ -177,16 +200,21 @@ export default function Stage(props){
     }
 
 
+
     /**
      * Render child in battle, incomplete
-     * @param {*} row 
-     * @param {*} column 
+     * @param {number} row 
+     * @param {number} column 
      */
     function renderBattleChild(row, column){
         if (currentPlayerCoord.y === row && currentPlayerCoord.x === column ){
             return <Player/>;
         }
-        else if (checkMovable(row, column, 1, false )){
+        else if ( checkEntityCoord(row, column) !== null ){
+            let key = checkEntityCoord(row, column)
+            return <Entity monsterKey={key} />;
+        }
+        else if (checkMovable(row, column, 1, false) && BattleSteps > 0  ){
             return (<ClickableCircle click={() => movePlayer(row, column) } />);
         }
         return <div></div>;
