@@ -41,21 +41,11 @@ export default function Card(props=defaultProps){
     }
 
 
-    function runCardEffect(){
-        for (var action in Card.effect ){
-            dispatch( Card.effect[action] );
-        }
-    }
-
-
     function onClick(){
-        runCardEffect();
-
-        /*
         if (props.clickable){
-           flipCard();
-        }
-        */
+           
+            // flipCard();
+        }   
     }
 
 

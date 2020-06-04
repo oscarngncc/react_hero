@@ -146,7 +146,6 @@ body {
 ************* Entity-Related-Stuff *******************
 */
 .stageObject {
-  
   position: relative;
   z-index: 20;
   top: -2rem;
@@ -170,6 +169,24 @@ body {
   drop-shadow(-0.2rem 0.2rem 0 white)
   drop-shadow(0.2rem -0.2rem 0 white)
   drop-shadow(-0.2rem -0.2rem 0 white);
+}
+
+
+
+.attackableEntity {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+
+  -webkit-filter: drop-shadow(0.2rem 0.2rem 0 lightcoral)
+  drop-shadow(-0.2rem 0.2rem 0 lightcoral)
+  drop-shadow(0.2rem -0.2rem 0 lightcoral)
+  drop-shadow(-0.2rem -0.2rem 0 lightcoral);
+
+  filter: drop-shadow(0.2rem 0.2rem 0 lightcoral)
+  drop-shadow(-0.2rem 0.2rem 0 lightcoral)
+  drop-shadow(0.2rem -0.2rem 0 lightcoral)
+  drop-shadow(-0.2rem -0.2rem 0 lightcoral);
 }
 
 

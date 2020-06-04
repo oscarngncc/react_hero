@@ -17,7 +17,11 @@ export default function ClickableCircle(props) {
     
     
     return (
-        <animated.div class = {Style.clickableCircle} onClick={props.click} style={fadeSpring} >           
+        <animated.div 
+        class = {Style.clickableCircle} 
+        onClick={props.click} 
+        style={fadeSpring} 
+        >           
         </animated.div>
     )
 }

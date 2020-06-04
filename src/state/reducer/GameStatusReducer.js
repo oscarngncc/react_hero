@@ -11,12 +11,23 @@ let initState = {
 
     health: 20,
     healthLimit: 20,
-    steps: 2,
+    
+    attack: 8, //3
+    
+    steps: 3, //2
     stepsLimit: 2,
+
 
     money: 0,
 
     entitiesStatus: {
+        /**
+         * entityKey : {
+         *      health: 20
+         *      healthLimit: 20
+         *      reward: 10
+         * }
+         */
     },
 }
 
@@ -109,6 +120,57 @@ function incrementMoney(state, action){
 
 
 
+/**
+ * Updating state after attack an enemy, reduce that target's health
+ * @param {*} state 
+ * @param {*} action 
+ */
+function attackEntity(state, action){
+    let entityKey = action.entityKey;
+    let newHP = Math.max(0, state.entitiesStatus[entityKey].health - state.attack )
+    
+    return updateObject( state, {
+        ...state,
+        entitiesStatus: {
+            ...state.entitiesStatus,
+            [entityKey] : {
+                ...state.entitiesStatus[action.entityKey],
+                health: newHP,
+            }
+        }
+    })
+}
+
+
+/**
+ * Entity getting defeated by the player
+ * @param {*} state 
+ * @param {*} action 
+ */
+function defeatEntity(state, action){
+    let entityKey = action.entityKey;
+
+    if (state.entitiesStatus[entityKey] === undefined){
+        return state;
+    }
+
+
+    let reward = state.entitiesStatus[entityKey].reward;
+    let newMoney = Math.min( Number.MAX_SAFE_INTEGER, state.money + reward );
+
+    //destructure to delete
+    const { [entityKey]: value , ...newEntitiesStatus } = state.entitiesStatus; 
+
+    return updateObject(state, {
+        ...state,
+        money: newMoney,
+        entitiesStatus: newEntitiesStatus,
+    });
+
+}
+
+
+
 
 export default function gameStatusReducer( state = initState, action ){
     switch ( action.type ){
@@ -124,6 +186,11 @@ export default function gameStatusReducer( state = initState, action ){
             return incrementHealth(state, action);        
         case Action.GameStatusAction.INCREMENT_MONEY:
             return incrementMoney(state, action);  
+        case Action.GameStatusAction.PLAYER_ATTACK:
+            return attackEntity(state, action);
+        case Action.GameStatusAction.ENTITY_DEFEAT:
+            return defeatEntity(state, action);
+
         default:
             return state;  
     }

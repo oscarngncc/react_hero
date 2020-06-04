@@ -16,6 +16,6 @@ export default function EntityInMap(props){
     }
 
     return (
-        <div onClick={() => triggerBattle() }>ENEMY</div>
+        <div onClick={() => triggerBattle()}  >ENEMY</div>
     );
 }

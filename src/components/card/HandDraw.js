@@ -3,9 +3,14 @@ import React, {useState, useRef, useEffect} from 'react' ;
 import {useSpring, useTrail, animated} from 'react-spring';
 import Draggable from 'react-draggable';
 
+import { DndProvider } from 'react-dnd';
+
+
+import * as Action from './../../state/action/action';
 import Card from './Card';
+import CardData from './../../data/card/Card';
 import Style from './../../css/Style.module.css';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 
 
 //import { connect } from 'react-redux';
@@ -13,16 +18,23 @@ import { useSelector } from 'react-redux';
 
 export default function HandDraw(props){
 
+    const dispatch = useDispatch();
+
     const defaultPos = {x: 0, y: 0};
     const noDragIndex = -1;
 
-
-    const cardList = useSelector(state => state.card.cardList);
+    const cardList = useSelector(state => state.card.handList);
     const [dragIndex, setDragIndex] = useState(noDragIndex);
     const [isProtrait, setisProtrait] = useState(window.innerHeight / window.innerWidth > 1 ? true : false);
 
+    //Check Redraw
+    if (cardList.length === 0){
+        dispatch(Action.CardAction.drawCard(4));
+    }
+
+
     useEffect(() => {
-        window.addEventListener("resize", ()=>{  setisProtrait(window.innerHeight / window.innerWidth > 1 ? true : false)    });
+        window.addEventListener("resize", ()=>{  setisProtrait(window.innerHeight / window.innerWidth > 1 ? true : false)   });
         return () => {
             window.removeEventListener("resize", ()=>{} );
         }
@@ -33,8 +45,6 @@ export default function HandDraw(props){
         from : {opacity: 1},
         to: { opacity: 0 },
     });
-
-
     const [initTrail, setInitTrail] = useTrail(cardList.length, function(){
         return {
             from: { 
@@ -50,18 +60,45 @@ export default function HandDraw(props){
     });
 
 
+
+    /** 
+     * use the card, including using its effect and discard it
+     * @param {number} index index of the card in your hand
+    */
+    function consumeCard(index){
+        const Card = CardData[ cardList[index] ];
+        let usable = true;
+
+        for (var condition in Card.effect ){
+
+        }
+        if (!usable){
+            return;
+        }
+        for (var action in Card.effect ){
+            dispatch( Card.effect[action] );
+        }
+    }
+
+
+    /**
+     * When card being dragged
+     * @param {*} index 
+     */
     function onDragStart(index){
         if (index !== dragIndex){
             setDragIndex(index);
         }
     }
 
-
-
-    function onDragEnd(data){
+    /**
+     * When card is no longer dragged
+     * @param {*} index 
+     */
+    function onDragEnd(index){
         setDragIndex(-1);
+        consumeCard(index)
     }
-
 
 
 
@@ -147,7 +184,7 @@ export default function HandDraw(props){
                     <Draggable
                     position={defaultPos}
                     onStart={() => onDragStart(index)}
-                    onStop={(_event, data) => onDragEnd(data)}
+                    onStop={(_event, data) => onDragEnd(index)}
                     >
                         <div>
                             <Card clickable={true} hoverable={hoverable} card={cardList[index] }  ></Card>

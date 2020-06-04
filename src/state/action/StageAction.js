@@ -16,7 +16,7 @@ export const GENERATE_LEVEL_BATTLE = "generateLevelInBattle";
 export const MOVE_PLAYER_GAMEMAP = "movePlayerInMap";
 export const MOVE_PLAYER_BATTLEMAP = "movePlayerInBattle";
 
-
+export const CLEAR_EVENT_GAMEMAP = "clearEventInMap";
 
 
 export const LEFT = "left";
@@ -139,7 +139,6 @@ export function generateBattleMap(){
 }
 
 
-
 /**
  * Action creator for Generating Level in Battle Map
  */
@@ -150,6 +149,9 @@ export function generateLevelInBattle(){
   }
 }
 
+
+
+export const clearEventInMap = makeActionCreator(CLEAR_EVENT_GAMEMAP, 'Coord');
 
 export const movePlayerInMap = makeActionCreator(MOVE_PLAYER_GAMEMAP, 'Coord');
 export const movePlayerInBattle = makeActionCreator(MOVE_PLAYER_BATTLEMAP, 'Coord');

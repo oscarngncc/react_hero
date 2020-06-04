@@ -1,5 +1,5 @@
 
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import { useSpring, useTrail, animated, useChain } from 'react-spring';
 import {useSelector, useDispatch} from 'react-redux';
 
@@ -46,6 +46,10 @@ export default function Stage(props){
     const partOfEventMap = (eventInMap !== null && eventInMap.length != 0  ) ? eventInMap.slice(0, rowLen).map(i => i.slice(partIndex, partIndex + colLen)) : defaultMap;
     const partOfGameCoord = { x: playerGameCoord.x % (colLen-1), y : playerGameCoord.y  };
 
+    //entity Statuses
+    const entitiesStatus = useSelector( state => state.game.entitiesStatus );
+
+
     if (partOfGameMap[0].length < colLen ){
         for ( let i = 0; i < partOfGameMap.length; i++  ){
             while (partOfGameMap[i].length < colLen ){
@@ -62,12 +66,29 @@ export default function Stage(props){
     
 
 
+    useEffect(() => {
+        //Unmount child entity if target has no health
+        Object.keys(entitiesStatus).forEach( function(key){
+            if (entitiesStatus[key].health <= 0){
+                dispatch(Action.GameStatusAction.entityDefeated(key));       
+            }
+        });
 
+        //Reset battlemap back if no entities left 
+        if (Object.keys(entitiesStatus).length === 0 ){
+            dispatch(Action.GameStatusAction.startBattle(false));
+        }
+    });
+
+
+
+    //animation-related
     const initMapRef = useRef();
     const initMap = useSpring({
         from: { transform: "translateY(-150rem)"},
         to: { transform: "translateX(0rem)"},
         config:  { mass: 5, tension: 400, friction: 60 },
+        ref: initMapRef,
     });
     
     const initTrailRef = useRef();
@@ -75,11 +96,11 @@ export default function Stage(props){
        from: { transform: "translateY(-150rem)"},
        to: { transform: "translateY(0rem)"},
        config:  { mass: 4, tension: 2000, friction: 140 },
-       delay: 600,
+       ref: initTrailRef,
     });
-
     useChain([initMapRef, initTrailRef]);
 
+    
 
     const nextLevelSpring = useSpring({
         from: { transform: "translateX(5rem)", opacity: 0.7 },
@@ -126,6 +147,9 @@ export default function Stage(props){
         return true;
     }
 
+
+
+
     /**
      * Based on row/column, check if entity exists on that pane
      * @param {number} row 
@@ -149,7 +173,6 @@ export default function Stage(props){
      * @param {number} column column value presented in "partOf" (presentation layer)
      */
     function getFullColumnFromPart(column){
-        console.log(column % (colLen) + partIndex);
         return column % (colLen) + partIndex;
     }
     
@@ -157,6 +180,7 @@ export default function Stage(props){
 
     /**
      * Move the Player in Map, usable for both map and battle
+     * NOTE: this function is passed to the child component as an onClickEvent
      * @param {number} row 
      * @param {number} column 
      */
@@ -179,6 +203,20 @@ export default function Stage(props){
 
 
 
+   /**
+    * Trigger general Event effect upon onclick
+     * including: remove event, move player to there
+    * @param {*} row Y index of the event
+    * @param {*} column X index of the event
+    */
+    function onClickEvent(row, column){
+        let coord = { x: column, y: row };
+        dispatch(Action.StageAction.clearEventInMap(coord));
+        dispatch(Action.StageAction.movePlayerInMap(coord));
+    }
+
+    
+
 
     /**
      * Render child in map. Noted that it's based off the map itself
@@ -190,7 +228,7 @@ export default function Stage(props){
             case Event.PLAYER:
                 return <Player/>;
             case Event.ENEMY:
-                return <EnemyInMap/>;
+                return <div onClick={() => onClickEvent(row, column)}><EnemyInMap/></div>;
             default:
                 if (checkMovable(row, column, 1, false )){
                     return (<ClickableCircle click={() => movePlayer(row, column) } />);
@@ -211,8 +249,9 @@ export default function Stage(props){
             return <Player/>;
         }
         else if ( checkEntityCoord(row, column) !== null ){
-            let key = checkEntityCoord(row, column)
-            return <Entity monsterKey={key} />;
+            let key = checkEntityCoord(row, column);
+            let attackable = checkMovable(row, column, 1, false) && BattleSteps > 0 ;
+            return <Entity monsterKey={key} attackable={attackable}  />;
         }
         else if (checkMovable(row, column, 1, false) && BattleSteps > 0  ){
             return (<ClickableCircle click={() => movePlayer(row, column) } />);
@@ -221,17 +260,25 @@ export default function Stage(props){
     }
 
 
-
+    /**
+     * render child depending on the map is used as battle or walkthrough
+     * @param {number} row 
+     * @param {number} column 
+     */
     function renderChild(row, column){
         return (isBattle) ? renderBattleChild(row, column) : renderMapChild(row, column);
     }
 
     
+    function enter(){
+        alert("ENTER");
+    }
+
 
     let nextLevelStyle = (isToNextLevel) ? nextLevelSpring : {};
     return (
-        <div class={Style.stage}>
-            <animated.div class={Style.gameMap} style={Object.assign(initMap, nextLevelStyle)} >
+        <div class={Style.stage} >
+            <animated.div class={Style.gameMap} style={ {...initMap, ...nextLevelStyle}  } >
                 <ul class={Style.tileMap}>
                     {currentMap.map((row, rowIndex) => {
                         return row.map((column, colIndex) => {
@@ -243,7 +290,7 @@ export default function Stage(props){
                                 <animated.li 
                                 class={Style.floorUnit}
                                 key={"tile" + index.toString()} 
-                                style={  Object.assign(initTrail[index], tileStyle ) }
+                                style={  { ...initTrail[index], ...tileStyle}  }
                                 >
                                     {renderChild(rowIndex, colIndex)}
                                 </animated.li> 
@@ -257,3 +304,5 @@ export default function Stage(props){
 }
 
 
+//<animated.div class={Style.gameMap} style={Object.assign(initMap, nextLevelStyle)} >
+//style={  Object.assign(initTrail[index], tileStyle ) }

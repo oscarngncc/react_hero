@@ -15,7 +15,7 @@ export default function Player(){
 
     return (         
         <div class={Style.stageObject}>
-            <img src={playerIMG} class={Style.stageImage} alt="PLAER"></img> 
+            <img draggable="false" src={playerIMG} class={Style.stageImage} alt="PLAER"></img> 
             {(isBattle) ? <div>{steps}</div> : <div></div> } 
         </div>
     );

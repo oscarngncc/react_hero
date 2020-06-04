@@ -2,6 +2,11 @@
 import * as Action from '../action/action';
 import * as Event from './../../data/event/Event';
 
+
+/**
+ * InitialState
+ * NOTE: all Map are just 2D numeric array
+ */
 let initState = {
     gameMap : null,
     playerGameMapCoord: { x: 0, y: 0 },
@@ -13,7 +18,7 @@ let initState = {
     battleMapRow: -1,
     battleMapCol: -1,
 
-    eventInMap: null,
+    eventInMap: null,    
     entityInMap: {
         /** example:
             12 : {
@@ -42,12 +47,15 @@ function movePlayer(state, action, isGameMap ){
     let xPos = action.Coord.x;
     let yPos = action.Coord.y;
 
-    let events = state.eventInMap;
-    events[state.playerGameMapCoord.y][state.playerGameMapCoord.x] = Event.EMPTY;
-    events[yPos][xPos] = Event.PLAYER;
 
     //move in game map
-    if (isGameMap){
+    if ( isGameMap ){
+
+        //Update Event
+        let events = state.eventInMap;
+        events[state.playerGameMapCoord.y][state.playerGameMapCoord.x] = Event.EMPTY;
+        events[yPos][xPos] = Event.PLAYER;
+
         if (xPos < 0){xPos = 0}
         else if (xPos > state.gameMapCol - 1 ){ xPos = state.gameMapCol - 1}
         else if (yPos < 0){yPos = 0}
@@ -126,6 +134,37 @@ function generateEvent(state, action){
 }
 
 
+function clearEvent(state, action){
+    let events = state.eventInMap;
+    events[action.Coord.y][action.Coord.x] = Event.EMPTY;
+    return updateObject( state, {
+        ...state,
+        eventInMap: events,
+    });
+}
+
+
+
+
+/**
+ * Remove entity from map
+ * NOTE: this is revoked by the reducer through a GameStatusAction, not a MapAction
+ * @param {*} state 
+ * @param {*} action 
+ */
+function removeDefeatedEntityFromMap(state, action){
+    let entityKey = action.entityKey;
+
+    //destructure to delete
+    const { [entityKey]: value , ...newEntityInMap } = state.entityInMap; 
+
+    return updateObject( state, {
+        ...state,
+        entityInMap: newEntityInMap,
+    });
+}
+
+
 
 export default function StageReducer(state = initState, action){
     switch (action.type){
@@ -141,7 +180,10 @@ export default function StageReducer(state = initState, action){
             return movePlayer(state, action, false);
         case Action.StageAction.GENERATE_EVENT:
             return generateEvent(state, action);
-
+        case Action.GameStatusAction.ENTITY_DEFEAT:
+            return removeDefeatedEntityFromMap(state, action);
+        case Action.StageAction.CLEAR_EVENT_GAMEMAP:
+            return clearEvent(state, action);
         default:
     }
     return state;

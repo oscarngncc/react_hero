@@ -13,8 +13,8 @@ import CardReducer from './CardReducer';
  * Combine Every Reducer!
  */
 let reducer = combineReducers({
-    game: GameStatusReducer,
     map: StageReducer,
+    game: GameStatusReducer,
     card: CardReducer,
     //pos: PositionReducer,
 });
