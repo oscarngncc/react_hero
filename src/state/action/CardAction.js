@@ -5,28 +5,72 @@ import makeActionCreator from './actionCreator';
 
 export const DRAW_CARD = "drawCard";
 export const DISCARD_CARD = "discardCard";
-
 export const REMOVE_CARD = "removeCard";
 export const APPEND_CARD = "addCard"; 
-
 export const SHUFFLE_DECK = "shuffleDeck";
+export const DISCARD_HAND = "discardHand";
+export const RESET_PILE = "resetPhile";
 
 
 
 /**
- * shuffle the deck
- * NOTE: since reducer supposed to be pure, a deck must be provided to action, the reducer only do validation
- * @param {*} deck 1D numeric array that contains card
+ * shuffle the deck, performing randomized deck here
+ * NOTE: rely on current state
+ * NOTE: impure action creator (this is allowed in Redux, just be reminded)
+ * @param {boolean} validation to perform validation or not
  */
-export function shuffleDeck(deck){
-    return {
-        type: SHUFFLE_DECK,
-        deck: deck,
+export function shuffleDeck( validation=true ){
+    return (dispatch, getState ) => {
+        const deckList = getState().card.deckList;
+        const deck = JSON.parse(JSON.stringify(deckList));
+
+        //randomized shuffle
+        for (var i = deck.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var temp = deck[i];
+            deck[i] = deck[j];
+            deck[j] = temp;
+        }
+
+        dispatch({
+            type: SHUFFLE_DECK,
+            cardList: deck,
+            validation: validation 
+        });
     }
 }
 
-export const drawCard = makeActionCreator(DRAW_CARD, "num");
-export const discardCard = makeActionCreator( DISCARD_CARD, "pos");
 
-export const removeCard = makeActionCreator(REMOVE_CARD);
-export const appendCard = makeActionCreator(APPEND_CARD);
+/**
+ * Perform draw card, shuffle the deck if needed
+ * @param {*} num number of card to draw
+ */
+export function drawCard(num){
+    return (dispatch, getState ) => {
+        const deckList = getState().card.deckList;
+        if (deckList.length < num ){
+            let remain = num - deckList.length;
+            dispatch( drawCardBasic(deckList.length) );
+            dispatch(resetPile());
+            dispatch(shuffleDeck());    
+            dispatch( drawCardBasic(remain));
+        }
+        else {
+            dispatch(drawCardBasic(num));
+        }
+    }
+}
+
+
+
+
+/**
+ * Simple Action Creator
+ */
+const drawCardBasic = makeActionCreator(DRAW_CARD, "num");
+export const discardCard = makeActionCreator( DISCARD_CARD, "pos");
+export const removeCard = makeActionCreator(REMOVE_CARD, "cardKey");
+export const appendCard = makeActionCreator(APPEND_CARD, "cardKey");
+
+export const discardHand = makeActionCreator(DISCARD_HAND);
+export const resetPile = makeActionCreator(RESET_PILE);

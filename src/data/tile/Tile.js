@@ -2,6 +2,7 @@
 export const NULL_TILE = -1;
 export const UNMOVEABLETILE = 0;
 export const NORMAL_TILE = 1;
+export const ATTACK_TILE = 2;
 
 export const nullTile = {
     key: NULL_TILE,
@@ -27,6 +28,14 @@ export const normalTile = {
     }
 }
 
+export const attackTile = {
+    key: ATTACK_TILE,
+    movable: true,
+    style: {
+        backgroundColor: "papayawhip",
+    }
+}
+
 
 
 function convertObject(arr){
@@ -42,7 +51,8 @@ const Tile = convertObject(
     [
         nullTile,
         unMovableTile,
-        normalTile
+        normalTile,
+        attackTile,
     ]
 );
 export default Tile;

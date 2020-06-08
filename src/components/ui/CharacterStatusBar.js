@@ -17,7 +17,8 @@ export default function CharacterStatusBar(){
     
     let healthPercent = Math.floor(HP/MaxHP * 100).toString() + "%";
     const healthBarSpring = useSpring({
-        width: healthPercent,
+        from: {width: "0%" },
+        to: { width: healthPercent, }
     });
 
     

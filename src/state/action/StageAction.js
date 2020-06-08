@@ -15,6 +15,7 @@ export const GENERATE_LEVEL_BATTLE = "generateLevelInBattle";
 
 export const MOVE_PLAYER_GAMEMAP = "movePlayerInMap";
 export const MOVE_PLAYER_BATTLEMAP = "movePlayerInBattle";
+export const MOVE_ENTITY_BATTLEMAP = "moveEntityInBattle";
 
 export const CLEAR_EVENT_GAMEMAP = "clearEventInMap";
 
@@ -64,7 +65,7 @@ export function generateGamePath(pathLength, splitChanceNum ){
     }
 
 
-    while (yPos != nextYPos){
+    while (yPos !== nextYPos){
       let step = (yPos < nextYPos ) ? 1 : -1;
       gameMap[yPos][xPos] = FILED_TILE;  //Fill
       yPos += step;
@@ -152,6 +153,6 @@ export function generateLevelInBattle(){
 
 
 export const clearEventInMap = makeActionCreator(CLEAR_EVENT_GAMEMAP, 'Coord');
-
 export const movePlayerInMap = makeActionCreator(MOVE_PLAYER_GAMEMAP, 'Coord');
 export const movePlayerInBattle = makeActionCreator(MOVE_PLAYER_BATTLEMAP, 'Coord');
+export const moveEntityInbattle = makeActionCreator(MOVE_ENTITY_BATTLEMAP); 

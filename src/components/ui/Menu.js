@@ -31,13 +31,11 @@ export default function Menu(props) {
 
     function startGame(){
         if (aboutStart){
-            let mapLength = 20;
-            dispatch(Action.StageAction.generateGamePath( mapLength, 20) );
-            dispatch(Action.StageAction.generateEvent(mapLength));
             dispatch(Action.GameStatusAction.startGame(true));
         }
     }
 
+    
     return (
         <animated.ul class={Style.mainMenu} style={fadeSpring} >
             <li class={Style.mainMenuItem} onClick={() => onClickStart() } >Start Game</li>

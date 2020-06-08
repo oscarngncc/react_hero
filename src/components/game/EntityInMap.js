@@ -10,8 +10,6 @@ export default function EntityInMap(props){
     let dispatch = useDispatch();
 
     function triggerBattle(){
-        dispatch(Action.StageAction.generateBattleMap());
-        dispatch(Action.StageAction.generateLevelInBattle());
         dispatch(Action.GameStatusAction.startBattle(true));
     }
 

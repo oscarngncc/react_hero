@@ -2,23 +2,24 @@
 import * as Action from '../action/action';
 import * as Entity from '../../data/entity/Entity';
 
+
 /**
  *  time: within range (0,24)
  */
 let initState = {
+    money: 0,
+
     startGame: false,
     isBattle: false,
 
     health: 20,
     healthLimit: 20,
-    
-    attack: 8, //3
-    
     steps: 3, //2
     stepsLimit: 2,
+    turn: 0,
+    attack: 8, //3
+    attackTemp: 0,
 
-
-    money: 0,
 
     entitiesStatus: {
         /**
@@ -53,6 +54,16 @@ function startBattle(state, action){
 }
 
 
+function resetStep(state){
+    return updateObject(state, {
+        ...state,
+        steps: state.stepsLimit,
+    });
+}
+
+
+
+
 /**
  * Generate Entities based on level, including setting up statuses
  * @param {*} state 
@@ -70,7 +81,6 @@ function generateEntitiesInBattle(state, action){
         newEntities[key].healthLimit = entity.health;
         newEntities[key].reward = entity.reward;
     }
-    
     
     return updateObject( state, {
         ...state,
@@ -92,7 +102,6 @@ function incrementSteps(state, action){
 function incrementHealth(state, action){
     let newHP = Math.max(0, state.health + action.value );
         newHP = Math.min(newHP, state.healthLimit );
-
     return updateObject( state, {
         ...state,
         health: newHP,
@@ -120,14 +129,33 @@ function incrementMoney(state, action){
 
 
 
+function incrementTurn(state, action){
+    let newTurn = Math.max( 0, state.turn + action.value );
+    return updateObject( state, {
+        ...state,
+        turn: newTurn,
+    });
+}
+
+
+
+
 /**
  * Updating state after attack an enemy, reduce that target's health
  * @param {*} state 
- * @param {*} action 
+ * @param {*} action entityKey
  */
 function attackEntity(state, action){
     let entityKey = action.entityKey;
-    let newHP = Math.max(0, state.entitiesStatus[entityKey].health - state.attack )
+
+    //Damage Calculation
+    let actualDmg = state.attack;
+    if (action.damage !== undefined ){
+        actualDmg += action.damage;
+    }
+
+
+    let newHP = Math.max(0, state.entitiesStatus[entityKey].health - actualDmg )
     
     return updateObject( state, {
         ...state,
@@ -142,18 +170,19 @@ function attackEntity(state, action){
 }
 
 
+
+
 /**
  * Entity getting defeated by the player
  * @param {*} state 
  * @param {*} action 
  */
 function defeatEntity(state, action){
-    let entityKey = action.entityKey;
 
+    let entityKey = action.entityKey;
     if (state.entitiesStatus[entityKey] === undefined){
         return state;
     }
-
 
     let reward = state.entitiesStatus[entityKey].reward;
     let newMoney = Math.min( Number.MAX_SAFE_INTEGER, state.money + reward );
@@ -180,6 +209,8 @@ export default function gameStatusReducer( state = initState, action ){
             return startBattle(state, action);
         case Action.StageAction.GENERATE_LEVEL_BATTLE:
             return generateEntitiesInBattle(state, action);
+        case Action.GameStatusAction.RESET_STEP:
+            return resetStep(state);
         case Action.GameStatusAction.INCREMENT_STEPS:
             return incrementSteps(state, action);
         case Action.GameStatusAction.INCREMENT_HEALTH:
@@ -190,7 +221,8 @@ export default function gameStatusReducer( state = initState, action ){
             return attackEntity(state, action);
         case Action.GameStatusAction.ENTITY_DEFEAT:
             return defeatEntity(state, action);
-
+        case Action.GameStatusAction.INCREMENT_TURN:
+            return incrementTurn(state, action);
         default:
             return state;  
     }

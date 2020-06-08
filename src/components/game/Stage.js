@@ -1,7 +1,8 @@
 
-import React, {useState, useRef, useEffect} from 'react';
+import React, {useCallback, useState, useRef, useEffect} from 'react';
 import { useSpring, useTrail, animated, useChain } from 'react-spring';
 import {useSelector, useDispatch} from 'react-redux';
+import { useDrop } from 'react-dnd';
 
 import Style from './../../css/Style.module.css';
 import * as Action from './../../state/action/action';
@@ -12,12 +13,21 @@ import Player from './../game/Player';
 import EnemyInMap from './../game/EntityInMap';
 import Entity from './Entity';
 
+import CardData from './../../data/card/Card';
+import EffectWrapper from './EffectWrapper';
+
+
 
 
 export default function Stage(props){
 
-    let dispatch = useDispatch();
+    const dispatch = useDispatch();
     const [isToNextLevel, setToNextLevel] = useState(false);
+    const [consumedCard, setConsumedCard] = useState(null);
+    
+    //NOT IDEAL!! USED FOR REFRESH GIF
+    const [refresh, setRefresh] = useState( Math.random()  );
+
 
     const rowLen = 4;
     const colLen = 5;
@@ -33,6 +43,7 @@ export default function Stage(props){
     const BattleSteps = useSelector(state => state.game.steps);
 
 
+
     //Placeholder, shouldn't be in use
     const defaultMap = [    
         [0, 0, 0, 0, 0,],
@@ -42,8 +53,8 @@ export default function Stage(props){
     ];
 
     const partIndex = Math.floor(playerGameCoord.x / (colLen-1) ) * (colLen-1);
-    const partOfGameMap = (gameMap !== null && gameMap.length != 0 ) ? gameMap.slice(0, rowLen).map(i => i.slice( partIndex, partIndex + colLen)) : defaultMap;
-    const partOfEventMap = (eventInMap !== null && eventInMap.length != 0  ) ? eventInMap.slice(0, rowLen).map(i => i.slice(partIndex, partIndex + colLen)) : defaultMap;
+    const partOfGameMap = (gameMap !== null && gameMap.length !== 0 ) ? gameMap.slice(0, rowLen).map(i => i.slice( partIndex, partIndex + colLen)) : defaultMap;
+    const partOfEventMap = (eventInMap !== null && eventInMap.length !== 0  ) ? eventInMap.slice(0, rowLen).map(i => i.slice(partIndex, partIndex + colLen)) : defaultMap;
     const partOfGameCoord = { x: playerGameCoord.x % (colLen-1), y : playerGameCoord.y  };
 
     //entity Statuses
@@ -82,7 +93,7 @@ export default function Stage(props){
 
 
 
-    //animation-related
+    /* ------ Animation Related ------ */
     const initMapRef = useRef();
     const initMap = useSpring({
         from: { transform: "translateY(-150rem)"},
@@ -100,8 +111,6 @@ export default function Stage(props){
     });
     useChain([initMapRef, initTrailRef]);
 
-    
-
     const nextLevelSpring = useSpring({
         from: { transform: "translateX(5rem)", opacity: 0.7 },
         to: { transform: "translateX(0rem)", opacity: 1 },
@@ -112,6 +121,58 @@ export default function Stage(props){
             }
         } 
     })
+
+
+
+    /**
+     * Droppable
+     * drop: only care about return undefined or not
+     */
+    const [{ item, isOver, canDrop }, drop] = useDrop({
+        accept: 'Card',
+        drop: () => { consumeCard(item); return item; },  
+        collect: (monitor) => ({
+            item: monitor.getItem(),
+            isOver: monitor.isOver(),
+            canDrop: monitor.canDrop()
+        })
+    });
+
+
+    /** 
+     * use the card, including using its effect and discard it
+     * NOTE: While it seem's weird to handle Card action here, it actually make perfect sense
+     * Upon dropping here, the card effect will also have impact on the map itself
+     * @param {object} item dragged object info defined by drag-N-drop Card 
+    */
+    function consumeCard(item){
+        const index = item.index;
+        const Card = CardData[item.card];
+
+        let usable = true;
+        for (var condition in Card.effect ){
+        }
+        if (!usable){ return; }
+
+        //Force Update of the dragged card
+        setConsumedCard(null);  
+        setConsumedCard(item);
+        setRefresh(Math.random());
+        for (var action in Card.effect ){
+            dispatch( Card.effect[action](playerBattleCoord, entitiesBattleCoords)  );
+        }  
+        dispatch(Action.CardAction.discardCard(index) );
+    }
+
+
+    /**
+     * Handling Action performed by the entity
+     */
+    function EntityAction(){
+        alert("Do something!");
+    }
+
+
 
 
 
@@ -185,6 +246,11 @@ export default function Stage(props){
      * @param {number} column 
      */
     function movePlayer(row, column){
+
+        if (consumeCard !== null ){
+            setConsumedCard(null);
+        }
+
         if ( isBattle ){
             let coord = { x: column, y: row };
             let move = Action.StageAction.movePlayerInBattle(coord);
@@ -215,6 +281,31 @@ export default function Stage(props){
         dispatch(Action.StageAction.movePlayerInMap(coord));
     }
 
+
+
+    /**
+     * 
+     * @param {*} row row of the tile
+     * @param {*} column column of the tile
+     * @param {*} cardID  card ID of the card (e.g. "forward")
+     */
+    function checkTargetTile(row, column, cardID){
+        const Card = CardData[cardID];
+        const target = Card.target;
+
+        if (target === undefined){
+            return false;
+        }
+
+        for (let i = 0; i < target.length; i++ ){
+            if ( row === currentPlayerCoord.y + target[i].y && column === currentPlayerCoord.x + target[i].x  ){
+                return true;
+            }
+        }
+        return false;
+    }
+
+
     
 
 
@@ -230,7 +321,7 @@ export default function Stage(props){
             case Event.ENEMY:
                 return <div onClick={() => onClickEvent(row, column)}><EnemyInMap/></div>;
             default:
-                if (checkMovable(row, column, 1, false )){
+                if (checkMovable(row, column, 1, false) && ! isToNextLevel ){
                     return (<ClickableCircle click={() => movePlayer(row, column) } />);
                 }
         }
@@ -245,19 +336,27 @@ export default function Stage(props){
      * @param {number} column 
      */
     function renderBattleChild(row, column){
+        
+        let child = null;
+        
         if (currentPlayerCoord.y === row && currentPlayerCoord.x === column ){
-            return <Player/>;
+            child = <Player/>;
         }
         else if ( checkEntityCoord(row, column) !== null ){
             let key = checkEntityCoord(row, column);
             let attackable = checkMovable(row, column, 1, false) && BattleSteps > 0 ;
-            return <Entity monsterKey={key} attackable={attackable}  />;
+            child = <Entity monsterKey={key} attackable={attackable}  />;
         }
-        else if (checkMovable(row, column, 1, false) && BattleSteps > 0  ){
-            return (<ClickableCircle click={() => movePlayer(row, column) } />);
+        else if (checkMovable(row, column, 1, false) && BattleSteps > 0 ){
+            child = (<ClickableCircle click={() => movePlayer(row, column) } />);
         }
-        return <div></div>;
+        else { child = <div></div>;}
+
+
+        const isEffect = (consumedCard !== null && checkTargetTile(row, column, consumedCard.card) ) ?  CardData[consumedCard.card].particle : undefined;
+        return <EffectWrapper effect={isEffect} refresh={refresh} >{child} </EffectWrapper>;
     }
+
 
 
     /**
@@ -269,22 +368,27 @@ export default function Stage(props){
         return (isBattle) ? renderBattleChild(row, column) : renderMapChild(row, column);
     }
 
-    
-    function enter(){
-        alert("ENTER");
-    }
 
 
-    let nextLevelStyle = (isToNextLevel) ? nextLevelSpring : {};
+    const nextLevelStyle = (isToNextLevel) ? nextLevelSpring : {};
+    const dragMapStyle = (isOver) ? {
+        boxShadow: "0 40px 100px -10px rgba(50, 50, 73, 0.4), 0 40px 40px -10px rgba(50, 50, 73, 0.3)"
+    } : {};
+
     return (
-        <div class={Style.stage} >
-            <animated.div class={Style.gameMap} style={ {...initMap, ...nextLevelStyle}  } >
+        <div class={Style.stage} ref={drop} >
+            <animated.div class={Style.gameMap} style={ {...initMap, ...nextLevelStyle, ...dragMapStyle }  } >
                 <ul class={Style.tileMap}>
                     {currentMap.map((row, rowIndex) => {
                         return row.map((column, colIndex) => {
                         
-                            var index = rowIndex * 5 + colIndex;
-                            var tileStyle = Tile.default[column.toString()].style;  
+                            let index = rowIndex * 5 + colIndex;
+                            let tileStyle = Tile.default[column.toString()].style;  
+
+                            //Change to Attack Tile upon hover
+                            if (isOver && checkTargetTile(rowIndex, colIndex, item.card) ){
+                                tileStyle = Tile.default[Tile.ATTACK_TILE].style;
+                            }
                             
                             return (
                                 <animated.li 

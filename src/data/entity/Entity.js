@@ -10,7 +10,7 @@ export const ghost = {
     health: 20,
     reward: 10,
     moves: {
-
+        
     },
 }
 
