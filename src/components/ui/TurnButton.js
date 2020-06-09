@@ -8,10 +8,12 @@ import { useSpring, animated } from 'react-spring';
 
 
 export default function TurnButton(){
+
+    const dispatch = useDispatch();
     const isBattle = useSelector(state => state.game.isBattle );
     const turn = useSelector(state => state.game.turn);
     const [toggleClick, setToggleClick] = useState(false);
-    const dispatch = useDispatch();
+
 
 
     const initSpring = useSpring({
@@ -36,7 +38,7 @@ export default function TurnButton(){
 
     //Perform Turn-Ended Related Action
     function onClick(){
-        setToggleClick(! toggleClick);
+        setToggleClick(!toggleClick);
         dispatch(Action.GameStatusAction.iterateTurn());
     }   
 

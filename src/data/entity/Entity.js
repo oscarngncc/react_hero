@@ -1,4 +1,7 @@
 
+import {StageAction } from './../../state/action/action';
+import { MOVE_STYLE } from '../../state/constant';
+
 
 export const GHOST = "ghost";
 export const MELODY = "melody";
@@ -9,20 +12,22 @@ export const ghost = {
     image: "Ghost.png",
     health: 20,
     reward: 10,
-    moves: {
+    distance: 3,
+    style: MOVE_STYLE.random,
+    get actions(){ return [ 
         
-    },
+    ]},
 }
-
 
 export const melody = {
     key: MELODY,
     image: "Melody.png",
     health: 15,
     reward: 10,
-    moves: {
-
-    }
+    style: MOVE_STYLE.offense,
+    get actions(){ return [ 
+       
+    ]},
 }
 
 

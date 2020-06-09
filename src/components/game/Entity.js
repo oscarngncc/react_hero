@@ -1,7 +1,9 @@
 
-import React, {useState} from 'react';
+import React, {useState, useEffect } from 'react';
 import Style from "./../../css/Style.module.css";
 import EntityData from "./../../data/entity/Entity";
+import {GameStatusAction, StageAction} from './../../state/action/action';
+import DialogBox from "./../ui/DialogBox";
 
 import * as Action from './../../state/action/action';
 import { useSelector, useDispatch } from 'react-redux';
@@ -16,17 +18,23 @@ import EffectWrapper from './EffectWrapper';
  * @param {*} props 
  */
 export default function Entity(props){
-    
-    const dispatch = useDispatch();
-    const [getAttacked, setGetAttacked] = useState(false);
-
 
     //Unique key referring to that entity in the map
+    //It also determines which entity to attack first
     const key = props.monsterKey;
+    const performAction = props.performAction;
     const attackable = props.attackable;
     const status = useSelector( state => state.game.entitiesStatus[key] );
+    const Coord = useSelector( state => state.map.entityInMap[key].Coord );
+    const playerCol = useSelector( state => state.map.playerBattleMapCoord.x );
+    const defeated = status.defeated;
     const type = status.type;
-    const image = require("./../../asset/" + EntityData[type].image.toString());
+    const entity = EntityData[type];
+    const image = require("./../../asset/" + entity.image.toString());
+
+    const dispatch = useDispatch();
+    const [getAttacked, setGetAttacked] = useState(false); 
+
 
 
    
@@ -62,13 +70,18 @@ export default function Entity(props){
     }
 
 
+
+    const mirrorStyle = (  playerCol - Coord.x >= 1 ) ? Style.mirror : {};  
+
+
+    //<DialogBox></DialogBox>
     return (
         <EffectWrapper afterEffect={afterEffect} effect={effect} > 
             <div 
             class={Style.stageObject} 
             onClick={onClickAttack} 
             >
-                <img draggable="false" src={image} class={[ Style.stageImage ].join('') } alt={type} ></img>
+                <img draggable="false" src={image} class={ `${Style.stageImage} ${mirrorStyle} ` } alt={type} ></img>
                 <div>{status.health + "/" + status.healthLimit }</div> 
             </div>
         </EffectWrapper> 

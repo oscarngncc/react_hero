@@ -58,7 +58,7 @@ function movePlayer(state, action, isGameMap ){
 
         if (xPos < 0){xPos = 0}
         else if (xPos > state.gameMapCol - 1 ){ xPos = state.gameMapCol - 1}
-        else if (yPos < 0){yPos = 0}
+        if (yPos < 0){yPos = 0}
         else if (yPos > state.gameMapRow - 1 ){yPos = state.gameMapRow - 1}
 
         return updateObject(state, {
@@ -71,7 +71,7 @@ function movePlayer(state, action, isGameMap ){
     else {
         if (xPos < 0){xPos = 0}
         else if (xPos > state.battleMapCol - 1 ){ xPos = state.battleMapCol - 1}
-        else if (yPos < 0){yPos = 0}
+        if (yPos < 0){yPos = 0}
         else if (yPos > state.battleMapRow - 1 ){yPos = state.battleMapRow - 1}
 
         return updateObject(state, {
@@ -80,6 +80,50 @@ function movePlayer(state, action, isGameMap ){
         });
     }
 }
+
+
+/**
+ * Move entity in map, also perform collision checking
+ * @param {*} state 
+ * @param {*} action 
+ */
+function moveEntity(state, action){
+    let x = action.Coord.x;
+    let y = action.Coord.y;
+    const entityKey = action.entityKey;
+    const playerBattleMapCoord = state.playerBattleMapCoord;
+
+    
+    if (x < 0){x = 0}
+    else if (x > state.battleMapCol - 1 ){ x = state.battleMapCol - 1}
+    if (y < 0){y = 0}
+    else if (y > state.battleMapRow - 1 ){y = state.battleMapRow - 1}
+
+
+    if (x === playerBattleMapCoord.x && y === playerBattleMapCoord.y ){
+        console.log("Collide with Player!");
+        return state;
+    }
+
+    const entityInMap = state.entityInMap;
+    for ( var key in entityInMap ){
+        if ( x === entityInMap[key].Coord.x && y === entityInMap[key].Coord.y ){
+            console.log("Collide with Entity!");
+            return state;
+        }
+    }
+
+    return updateObject( state, {
+        ...state,
+        entityInMap: {
+            ...entityInMap,
+            [entityKey] : {
+                Coord: {x: x, y: y},
+            }
+        }
+    }); 
+}
+
 
 
 function generateGameMap(state, action){
@@ -184,6 +228,8 @@ export default function StageReducer(state = initState, action){
             return removeDefeatedEntityFromMap(state, action);
         case Action.StageAction.CLEAR_EVENT_GAMEMAP:
             return clearEvent(state, action);
+        case Action.StageAction.MOVE_ENTITY_BATTLEMAP:
+            return moveEntity(state, action);
         default:
     }
     return state;

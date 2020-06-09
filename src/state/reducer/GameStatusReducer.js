@@ -27,6 +27,7 @@ let initState = {
          *      health: 20
          *      healthLimit: 20
          *      reward: 10
+         *      defeated: false
          * }
          */
     },
@@ -154,7 +155,6 @@ function attackEntity(state, action){
         actualDmg += action.damage;
     }
 
-
     let newHP = Math.max(0, state.entitiesStatus[entityKey].health - actualDmg )
     
     return updateObject( state, {
@@ -184,8 +184,8 @@ function defeatEntity(state, action){
         return state;
     }
 
-    let reward = state.entitiesStatus[entityKey].reward;
-    let newMoney = Math.min( Number.MAX_SAFE_INTEGER, state.money + reward );
+    const reward = state.entitiesStatus[entityKey].reward;
+    const newMoney = Math.min( Number.MAX_SAFE_INTEGER, state.money + reward );
 
     //destructure to delete
     const { [entityKey]: value , ...newEntitiesStatus } = state.entitiesStatus; 

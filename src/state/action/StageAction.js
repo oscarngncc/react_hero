@@ -4,6 +4,9 @@ import * as Event from './../../data/event/Event';
 import * as Tile from './../../data/tile/Tile';
 import * as Entity from './../../data/entity/Entity';
 import * as Level from '../../data/level/Level';
+import * as Constant from './../constant';
+import moveEntityInBattle, {MOVE_ENTITY_BATTLEMAP} from './StageEntityAction';
+
 
 /**
  *  Game Map Related
@@ -15,20 +18,11 @@ export const GENERATE_LEVEL_BATTLE = "generateLevelInBattle";
 
 export const MOVE_PLAYER_GAMEMAP = "movePlayerInMap";
 export const MOVE_PLAYER_BATTLEMAP = "movePlayerInBattle";
-export const MOVE_ENTITY_BATTLEMAP = "moveEntityInBattle";
-
 export const CLEAR_EVENT_GAMEMAP = "clearEventInMap";
 
 
-export const LEFT = "left";
-export const RIGHT = "right";
-export const TOP = "top";
-export const DOWN = "down";
-
-
-const stageRow = 4;
-const stageColumn = 5;
-
+const stageRow = Constant.STAGE_ROW ;
+const stageColumn = Constant.STAGE_COL ;
 
 
 /**
@@ -146,13 +140,22 @@ export function generateBattleMap(){
 export function generateLevelInBattle(){
   return {
     type: GENERATE_LEVEL_BATTLE,
-    level: Level.base_1,
+    level: Level.base_2,
   }
 }
 
 
 
+/**
+ * More Simple Action Creator
+ */
 export const clearEventInMap = makeActionCreator(CLEAR_EVENT_GAMEMAP, 'Coord');
 export const movePlayerInMap = makeActionCreator(MOVE_PLAYER_GAMEMAP, 'Coord');
 export const movePlayerInBattle = makeActionCreator(MOVE_PLAYER_BATTLEMAP, 'Coord');
-export const moveEntityInbattle = makeActionCreator(MOVE_ENTITY_BATTLEMAP); 
+
+
+/**
+ * export StageEntityAction
+ */
+export {moveEntityInBattle};
+export {MOVE_ENTITY_BATTLEMAP};

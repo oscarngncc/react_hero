@@ -14,6 +14,7 @@ import EnemyInMap from './../game/EntityInMap';
 import Entity from './Entity';
 
 import CardData from './../../data/card/Card';
+import EntityData from './../../data/entity/Entity';
 import EffectWrapper from './EffectWrapper';
 
 
@@ -41,7 +42,7 @@ export default function Stage(props){
     const playerBattleCoord = useSelector( state => state.map.playerBattleMapCoord);
     const entitiesBattleCoords = useSelector( state => state.map.entityInMap);
     const BattleSteps = useSelector(state => state.game.steps);
-
+    const turn = useSelector(state => state.game.turn );
 
 
     //Placeholder, shouldn't be in use
@@ -59,6 +60,7 @@ export default function Stage(props){
 
     //entity Statuses
     const entitiesStatus = useSelector( state => state.game.entitiesStatus );
+    const entitiesInMap = useSelector(state => state.map.entityInMap );
 
 
     if (partOfGameMap[0].length < colLen ){
@@ -70,23 +72,106 @@ export default function Stage(props){
         }
     }
 
-
-    /* This should be the only ones used by the presentation layer */
+    //This should be the only ones used by the presentation layer 
     const currentMap = (isBattle) ? battleMap : partOfGameMap;
     const currentPlayerCoord = (isBattle) ? playerBattleCoord : partOfGameCoord;
     
 
 
+
+
+    /**
+     * Perform Action by certain entity
+     */
+    function performEntityAction(key){
+
+        const type = entitiesStatus[key].type;
+        const Coord = entitiesInMap[key].Coord;
+        const distance = EntityData[type].distance;
+        const style = EntityData[type].style;
+
+        var actions = [];
+        for ( var i = 0; i < distance; i++ ){
+            actions.push(Action.StageAction.moveEntityInBattle(key, style, playerBattleCoord));
+        }
+
+        actions.map( function(action, index){
+            setTimeout( () => {
+                dispatch(action)
+            }, 100 + index * 500 );
+        });
+    }
+
+
+
+
+    /**
+     * Generator Function
+     * @param {Function} resume function which has ability to call generator.next() on top of callback func
+     */
+    function* performEntitiesAction(resume){ 
+        
+        /**
+         * simple async function that will be yielded (here used as delay between entity who sequence of action)
+         * @param {*} time time needed to wait for this async func to execute
+         * @param {*} callback will actually be plugged with function resume()  
+         * @param {*} key unique key of the entity
+         */
+        function delay(time, callback, key) {
+            setTimeout(function () {
+              callback(key);
+            }, time);
+        }
+
+        for ( var index = 0; index < Object.keys(entitiesStatus).length; index++ ){
+            const key = Object.keys(entitiesStatus)[index];
+            const time = index === 0 ? 0 : 1600;
+            yield delay( time, resume, key );
+        }
+    }
+     
+
+    
+    /**
+     * Helper function for the generator
+     * @param {*} generatorFunction 
+     */
+    function run(generatorFunction) {
+        /**
+         * What resume does here is to call our async function AND 
+         * @param {*} key unique entity key obtained from generator.delay()
+         */
+        function resume(key) {
+            performEntityAction(key);
+            generatorItr.next();
+        }
+        var generatorItr = generatorFunction(resume);
+        generatorItr.next();
+    }
+
+
+    
+    /**
+     * Perform Entity Action upon turn gets updated
+     * Including: Doing action one by one
+     */
     useEffect(() => {
+        if (turn >= 2 ){
+            run(performEntitiesAction);
+        }
+    }, [turn])
+
+   
+
+    useEffect(() => {    
         //Unmount child entity if target has no health
         Object.keys(entitiesStatus).forEach( function(key){
             if (entitiesStatus[key].health <= 0){
                 dispatch(Action.GameStatusAction.entityDefeated(key));       
             }
         });
-
-        //Reset battlemap back if no entities left 
-        if (Object.keys(entitiesStatus).length === 0 ){
+        //Reset battlemap back if all entities defeated
+        if ( Object.keys(entitiesStatus).length === 0 ){
             dispatch(Action.GameStatusAction.startBattle(false));
         }
     });
@@ -125,7 +210,7 @@ export default function Stage(props){
 
 
     /**
-     * Droppable
+     * DND-Droppable
      * drop: only care about return undefined or not
      */
     const [{ item, isOver, canDrop }, drop] = useDrop({
@@ -139,9 +224,10 @@ export default function Stage(props){
     });
 
 
+
     /** 
      * use the card, including using its effect and discard it
-     * NOTE: While it seem's weird to handle Card action here, it actually make perfect sense
+     * NOTE: While it seem's weird to handle Card action here, it actually kinda make sense
      * Upon dropping here, the card effect will also have impact on the map itself
      * @param {object} item dragged object info defined by drag-N-drop Card 
     */
@@ -162,14 +248,6 @@ export default function Stage(props){
             dispatch( Card.effect[action](playerBattleCoord, entitiesBattleCoords)  );
         }  
         dispatch(Action.CardAction.discardCard(index) );
-    }
-
-
-    /**
-     * Handling Action performed by the entity
-     */
-    function EntityAction(){
-        alert("Do something!");
     }
 
 
@@ -246,7 +324,6 @@ export default function Stage(props){
      * @param {number} column 
      */
     function movePlayer(row, column){
-
         if (consumeCard !== null ){
             setConsumedCard(null);
         }
@@ -284,19 +361,18 @@ export default function Stage(props){
 
 
     /**
-     * 
-     * @param {*} row row of the tile
-     * @param {*} column column of the tile
-     * @param {*} cardID  card ID of the card (e.g. "forward")
+     * Check if the tile will be in range of player's card upon drag-n-drop a specific card
+     * @param {number} row row of the tile
+     * @param {number} column column of the tile
+     * @param {String} cardID  card ID of the card (e.g. "forward")
+     * @return {boolean} true if it will be
      */
     function checkTargetTile(row, column, cardID){
         const Card = CardData[cardID];
         const target = Card.target;
-
         if (target === undefined){
             return false;
         }
-
         for (let i = 0; i < target.length; i++ ){
             if ( row === currentPlayerCoord.y + target[i].y && column === currentPlayerCoord.x + target[i].x  ){
                 return true;
@@ -307,7 +383,6 @@ export default function Stage(props){
 
 
     
-
 
     /**
      * Render child in map. Noted that it's based off the map itself
@@ -329,9 +404,10 @@ export default function Stage(props){
     }
 
 
+    
 
     /**
-     * Render child in battle, incomplete
+     * Render child in battle map, incomplete
      * @param {number} row 
      * @param {number} column 
      */
@@ -340,18 +416,17 @@ export default function Stage(props){
         let child = null;
         
         if (currentPlayerCoord.y === row && currentPlayerCoord.x === column ){
-            child = <Player/>;
+            child = <Player key="Player" />;
         }
         else if ( checkEntityCoord(row, column) !== null ){
-            let key = checkEntityCoord(row, column);
-            let attackable = checkMovable(row, column, 1, false) && BattleSteps > 0 ;
-            child = <Entity monsterKey={key} attackable={attackable}  />;
+            const key = checkEntityCoord(row, column);
+            const attackable = checkMovable(row, column, 1, false) && BattleSteps > 0 ;
+            child = <Entity monsterKey={key} attackable={attackable}/>;
         }
         else if (checkMovable(row, column, 1, false) && BattleSteps > 0 ){
             child = (<ClickableCircle click={() => movePlayer(row, column) } />);
         }
         else { child = <div></div>;}
-
 
         const isEffect = (consumedCard !== null && checkTargetTile(row, column, consumedCard.card) ) ?  CardData[consumedCard.card].particle : undefined;
         return <EffectWrapper effect={isEffect} refresh={refresh} >{child} </EffectWrapper>;
@@ -371,10 +446,7 @@ export default function Stage(props){
 
 
     const nextLevelStyle = (isToNextLevel) ? nextLevelSpring : {};
-    const dragMapStyle = (isOver) ? {
-        boxShadow: "0 40px 100px -10px rgba(50, 50, 73, 0.4), 0 40px 40px -10px rgba(50, 50, 73, 0.3)"
-    } : {};
-
+    const dragMapStyle = (isOver) ? { boxShadow: "0 40px 100px -10px rgba(50, 50, 73, 0.4), 0 40px 40px -10px rgba(50, 50, 73, 0.3)"} : {};
     return (
         <div class={Style.stage} ref={drop} >
             <animated.div class={Style.gameMap} style={ {...initMap, ...nextLevelStyle, ...dragMapStyle }  } >
@@ -407,6 +479,3 @@ export default function Stage(props){
     );    
 }
 
-
-//<animated.div class={Style.gameMap} style={Object.assign(initMap, nextLevelStyle)} >
-//style={  Object.assign(initTrail[index], tileStyle ) }

@@ -1,5 +1,5 @@
 
-import { createStore, applyMiddleware } from 'redux';
+import { createStore, applyMiddleware, compose } from 'redux';
 import reducer from './reducer/reducer';
 import thunk from 'redux-thunk';
 
@@ -7,8 +7,9 @@ import thunk from 'redux-thunk';
  * Singleton,
  * dispatch it to submit and trigger state
  */
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const store = createStore(
     reducer,
-    applyMiddleware(thunk)
+    composeEnhancers( applyMiddleware(thunk)),
 );
 export default store;

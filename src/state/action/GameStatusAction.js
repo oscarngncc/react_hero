@@ -47,9 +47,9 @@ export function playerSpreadAttack(playerCoord, entitiesCoords, targets, damage=
         }
     });
     return dispatch => {
-        for (const entityKey in targetEntity){
+        targetEntity.forEach( entityKey => {
             dispatch( playerAttack(entityKey, damage));
-        }
+        });
     }
 }
 
