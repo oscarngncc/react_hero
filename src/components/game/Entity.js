@@ -4,7 +4,7 @@ import Style from "./../../css/Style.module.css";
 import EntityData from "./../../data/entity/Entity";
 import {GameStatusAction, StageAction} from './../../state/action/action';
 import DialogBox from "./../ui/DialogBox";
-
+import {DIRECTION} from './../../state/constant';
 import * as Action from './../../state/action/action';
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -22,19 +22,28 @@ export default function Entity(props){
     //Unique key referring to that entity in the map
     //It also determines which entity to attack first
     const key = props.monsterKey;
-    const performAction = props.performAction;
-    const attackable = props.attackable;
-    const status = useSelector( state => state.game.entitiesStatus[key] );
+    const status = useSelector( state => state.game.statuses[key] );
     const Coord = useSelector( state => state.map.entityInMap[key].Coord );
     const playerCol = useSelector( state => state.map.playerBattleMapCoord.x );
-    const defeated = status.defeated;
+    const inputLock = useSelector( state => state.game.inputLock );
+    const attackable = props.attackable && (!inputLock) ;
     const type = status.type;
     const entity = EntityData[type];
-    const image = require("./../../asset/" + entity.image.toString());
+    const image = require("./../../asset/entity/" + entity.image.toString());
+    const direction = (  playerCol - Coord.x >= 1 ) ? DIRECTION.right: DIRECTION.left;
 
     const dispatch = useDispatch();
     const [getAttacked, setGetAttacked] = useState(false); 
 
+
+    /**
+     * Toggle Direction
+     */
+    useEffect(() => {
+        if (status.direction !== direction){
+            dispatch(Action.GameStatusAction.setEntityDirection(key, direction) );
+        }
+    }, [direction]);
 
 
    
@@ -71,9 +80,7 @@ export default function Entity(props){
 
 
 
-    const mirrorStyle = (  playerCol - Coord.x >= 1 ) ? Style.mirror : {};  
-
-
+    const mirrorStyle = (  direction === DIRECTION.right ) ? Style.mirror : {};  
     //<DialogBox></DialogBox>
     return (
         <EffectWrapper afterEffect={afterEffect} effect={effect} > 

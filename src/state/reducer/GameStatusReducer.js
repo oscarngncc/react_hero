@@ -1,35 +1,35 @@
 
 import * as Action from '../action/action';
 import * as Entity from '../../data/entity/Entity';
+import * as Constant from './../constant';
+import {PLAYER_ID} from './../constant';
+import Update from 'immutability-helper';
 
 
-/**
- *  time: within range (0,24)
- */
 let initState = {
-    money: 0,
-
+    //Game-Related, singleton status
     startGame: false,
     isBattle: false,
-
-    health: 20,
-    healthLimit: 20,
-    steps: 3, //2
-    stepsLimit: 2,
+    inputLock: false,
+    
     turn: 0,
-    attack: 8, //3
-    attackTemp: 0,
+    money: 0,
 
+    //Player exclusive stat:
+    steps: 10, 
+    stepsLimit: 10,
 
-    entitiesStatus: {
-        /**
-         * entityKey : {
-         *      health: 20
-         *      healthLimit: 20
-         *      reward: 10
-         *      defeated: false
-         * }
-         */
+    entities: [],
+
+    statuses: {
+        [Constant.PLAYER_ID]: {
+            health: 20,
+            healthLimit: 20,
+            attack: 10, //3
+            attackTemp: 0,
+            direction: Constant.DIRECTION.right
+        },
+        /** other possible entities statuses */
     },
 }
 
@@ -37,6 +37,8 @@ let initState = {
 function updateObject(old, newObj){
     return Object.assign({}, old, newObj );
 }
+
+
 
 
 function startGame(state, action){
@@ -47,12 +49,23 @@ function startGame(state, action){
 }
 
 
+
 function startBattle(state, action){
     return updateObject( state, {
         ...state,
         isBattle: action.value,
     });
 }
+
+
+
+function setInputLock(state, action){
+    return updateObject(state, {
+        ...state,
+        inputLock: action.value,
+    })
+}
+
 
 
 function resetStep(state){
@@ -64,57 +77,11 @@ function resetStep(state){
 
 
 
-
-/**
- * Generate Entities based on level, including setting up statuses
- * @param {*} state 
- * @param {*} action 
- */
-function generateEntitiesInBattle(state, action){
-    let newEntities = JSON.parse(JSON.stringify( action.level.entities ));
-    
-    for (let key in newEntities ){
-        delete newEntities[key].Coord;
-
-        //SetUp
-        let entity = Entity.default[ newEntities[key].type.toString() ];
-        newEntities[key].health = entity.health;
-        newEntities[key].healthLimit = entity.health;
-        newEntities[key].reward = entity.reward;
-    }
-    
-    return updateObject( state, {
-        ...state,
-        entitiesStatus: newEntities, 
-    });
-}
-
-
 function incrementSteps(state, action){
     let newSteps = Math.max(0, state.steps + action.value );
     return updateObject( state, {
         ...state,
         steps: newSteps,
-    });
-}
-
-
-
-function incrementHealth(state, action){
-    let newHP = Math.max(0, state.health + action.value );
-        newHP = Math.min(newHP, state.healthLimit );
-    return updateObject( state, {
-        ...state,
-        health: newHP,
-    });
-}
-
-
-function incrementHealthLimit(state, action){
-    let HPLimit = Math.max(0, state.healthLimit + action.value );
-    return updateObject( state, {
-        ...state,
-        healthLimit: HPLimit,
     });
 }
 
@@ -141,62 +108,169 @@ function incrementTurn(state, action){
 
 
 
-/**
- * Updating state after attack an enemy, reduce that target's health
- * @param {*} state 
- * @param {*} action entityKey
- */
-function attackEntity(state, action){
-    let entityKey = action.entityKey;
-
-    //Damage Calculation
-    let actualDmg = state.attack;
-    if (action.damage !== undefined ){
-        actualDmg += action.damage;
-    }
-
-    let newHP = Math.max(0, state.entitiesStatus[entityKey].health - actualDmg )
-    
-    return updateObject( state, {
-        ...state,
-        entitiesStatus: {
-            ...state.entitiesStatus,
-            [entityKey] : {
-                ...state.entitiesStatus[action.entityKey],
-                health: newHP,
+function togglePlayerDirection(state) {
+    const dir = (state.statuses[Constant.PLAYER_ID].direction === Constant.DIRECTION.right ) ? Constant.DIRECTION.left : Constant.DIRECTION.right ;
+    return Update( state, {
+        statuses: {
+            [Constant.PLAYER_ID]: {
+                direction: { $set: dir }
             }
         }
-    })
+    });
+}
+
+
+
+
+function setEntityDirection(state, action){
+    const entityKey = action.entityKey;
+    const direction = action.direction;
+    return Update(state, {
+        statuses: {
+            [entityKey]: {
+                direction: { $set: direction }
+            }
+        }
+    });
 }
 
 
 
 
 /**
- * Entity getting defeated by the player
+ * Generate Entities based on level, including setting up statuses
  * @param {*} state 
  * @param {*} action 
  */
-function defeatEntity(state, action){
+function generateEntitiesInBattle(state, action){
+    let newEntitiesStatus = JSON.parse(JSON.stringify( action.level.entities ));
+    let entities = [];
+    
+    for (let key in newEntitiesStatus ){
+        //SetUp
+        delete newEntitiesStatus[key].Coord;
+        let entity = Entity.default[ newEntitiesStatus[key].type.toString() ];
+        newEntitiesStatus[key].health = entity.health;
+        newEntitiesStatus[key].healthLimit = entity.health;
+        newEntitiesStatus[key].reward = entity.reward;
+        newEntitiesStatus[key].direction = Constant.DIRECTION.left;
 
-    let entityKey = action.entityKey;
-    if (state.entitiesStatus[entityKey] === undefined){
+        entities.push(key);
+    }
+    return updateObject( state, {
+        ...state,
+        entities: entities,
+        statuses: {
+            ...state.statuses,
+            ...newEntitiesStatus
+        }
+    });
+}
+
+
+
+
+
+function incrementHealth(state, action){
+    const entityKey = ( action.entityKey !== undefined) ? action.entityKey : PLAYER_ID;
+    const status = state.statuses[entityKey];
+    const value = action.value;
+
+    let newHP = Math.max(0,  status.health + value );
+        newHP = Math.min(newHP, status.healthLimit );
+
+    return Update(state, {
+        statuses: {
+            [entityKey]: {
+                health: { $set: newHP }
+            }
+        }
+    });
+}
+
+
+
+function incrementHealthLimit(state, action){
+    const entityKey = ( action.entityKey !== undefined) ? action.entityKey : PLAYER_ID;
+    const status = state.statuses[entityKey];
+    const value = action.value;
+
+    const HPLimit = Math.max(0, status.healthLimit + value );
+
+    return Update(state, {
+        statuses: {
+            [entityKey]: {
+                healthLimit: { $set: HPLimit }
+            }
+        }
+    });
+}
+
+
+/**
+ * Updating status after getting attacked reduce that target's health
+ * @param {*} state 
+ * @param {*} action entityKey
+ */
+function getAttacked(state, action){
+    const hostKey = ( action.hostKey !== undefined) ? action.hostKey : PLAYER_ID;
+    const targetKey = ( action.targetKey !== undefined) ? action.targetKey : PLAYER_ID;
+
+    if (hostKey === targetKey ){
         return state;
     }
 
-    const reward = state.entitiesStatus[entityKey].reward;
+    const hostStatus = state.statuses[hostKey];
+    const targetStatus = state.statuses[targetKey];
+    
+    //Damage Calculation
+    let actualDmg = ( hostStatus.attack !== undefined ) ? hostStatus.attack : 0;
+    actualDmg += (action.damage !== undefined ) ? action.damage : 0;
+    
+    //Health calculation
+    const newHP = Math.max(0, targetStatus.health - actualDmg );
+
+    return Update( state, {
+        statuses: {
+            [targetKey]: {
+               health: { $set: newHP }
+            }
+        }
+    })
+
+}
+
+
+
+/**
+ * Entity getting defeated by the player, remove it from store
+ * @param {*} state 
+ * @param {*} action entityKey
+ */
+function defeatEntity(state, action){
+    const entityKey = action.entityKey;
+    if (state.statuses[entityKey] === undefined){ 
+        return state; 
+    }
+    
+    const reward = state.statuses[entityKey].reward ?? 0;
     const newMoney = Math.min( Number.MAX_SAFE_INTEGER, state.money + reward );
 
+    //alert(entityKey);
+
     //destructure to delete
-    const { [entityKey]: value , ...newEntitiesStatus } = state.entitiesStatus; 
+    const { [entityKey]: value , ...newEntitiesStatus } = state.statuses;
+    const newEntity = state.entities.filter( a => a !== entityKey ); 
 
     return updateObject(state, {
         ...state,
         money: newMoney,
-        entitiesStatus: newEntitiesStatus,
+        entities: newEntity,
+        statuses: newEntitiesStatus,
     });
-
 }
+
+
 
 
 
@@ -217,12 +291,18 @@ export default function gameStatusReducer( state = initState, action ){
             return incrementHealth(state, action);        
         case Action.GameStatusAction.INCREMENT_MONEY:
             return incrementMoney(state, action);  
-        case Action.GameStatusAction.PLAYER_ATTACK:
-            return attackEntity(state, action);
+        case Action.GameStatusAction.ATTACK:
+            return getAttacked(state, action);
         case Action.GameStatusAction.ENTITY_DEFEAT:
             return defeatEntity(state, action);
         case Action.GameStatusAction.INCREMENT_TURN:
             return incrementTurn(state, action);
+        case Action.GameStatusAction.SET_INPUT_LOCK:
+            return setInputLock(state, action);
+        case Action.GameStatusAction.SET_PLAYER_DIRECTION:
+            return togglePlayerDirection(state);
+        case Action.GameStatusAction.SET_ENTITY_DIRECTION:
+            return setEntityDirection(state, action);
         default:
             return state;  
     }

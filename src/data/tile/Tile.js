@@ -16,7 +16,8 @@ export const unMovableTile = {
     key: UNMOVEABLETILE,
     movable: false,
     style: {
-        backgroundColor: "pink",
+        backgroundColor: "whitesmoke",
+        border: "solid rgb(230,230,230) 0.5rem"
     }
 }
 
@@ -24,7 +25,7 @@ export const normalTile = {
     key: NORMAL_TILE,
     movable: true,
     style: {
-        backgroundColor: "lightblue",
+        backgroundColor: "rgb(24,24,24)",
     }
 }
 
@@ -32,7 +33,7 @@ export const attackTile = {
     key: ATTACK_TILE,
     movable: true,
     style: {
-        backgroundColor: "papayawhip",
+        backgroundColor: "red",
     }
 }
 

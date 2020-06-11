@@ -1,10 +1,6 @@
 
 
 import makeActionCreator from './actionCreator';
-import * as Event from './../../data/event/Event';
-import * as Tile from './../../data/tile/Tile';
-import * as Entity from './../../data/entity/Entity';
-import * as Level from '../../data/level/Level';
 import {DIRECTION, MOVE_STYLE, STAGE_ROW, STAGE_COL} from './../constant';
 
 
@@ -51,15 +47,15 @@ function moveEntityInRandom(key, Coord, distance){
     //Random Movement
     let remain = distance;
     let x = Math.floor( Math.random() * (remain + 1) );
-    x *= Math.floor(Math.random() *2) == 1 ? 1 : -1;
-    x = (Coord.x == stageColumn - 1 ) ? Math.abs(x) * -1 : x;
-    x = (Coord.x == 0 ) ? Math.abs(x) *  1 : x;
+    x *= Math.floor(Math.random() *2) === 1 ? 1 : -1;
+    x = (Coord.x === stageColumn - 1 ) ? Math.abs(x) * -1 : x;
+    x = (Coord.x === 0 ) ? Math.abs(x) *  1 : x;
     remain = remain - Math.abs(x);
   
     let y = Math.floor( Math.random() * (remain + 1) );
-    y *= Math.floor(Math.random() *2) == 1 ? 1 : -1;
-    y = (Coord.y == stageRow - 1 ) ? Math.abs(y) * -1 : y;
-    y = (Coord.y == 0 ) ? Math.abs(y) *  1 : y;
+    y *= Math.floor(Math.random() *2) === 1 ? 1 : -1;
+    y = (Coord.y === stageRow - 1 ) ? Math.abs(y) * -1 : y;
+    y = (Coord.y === 0 ) ? Math.abs(y) *  1 : y;
   
     const newCoord = {x: x + Coord.x, y: y + Coord.y };
     return moveEntityInbattle_base(key, newCoord) ;

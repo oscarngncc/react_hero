@@ -112,7 +112,6 @@ function moveEntity(state, action){
             return state;
         }
     }
-
     return updateObject( state, {
         ...state,
         entityInMap: {

@@ -14,7 +14,6 @@ export const RECKLESS_CHARGE = "Reckless Charge";
 
 
 
-
 export const forward = {
     key: FORWARD,
     description: "Gain 1 step",
@@ -38,7 +37,7 @@ export const strike = {
         {x: 2, y: 0}
     ],
     get effect(){ return [ 
-        (playerCoord, entitiesCoord) => GameStatusAction.playerSpreadAttack(playerCoord, entitiesCoord, this.target, this.damage ),
+        (hostKey) => GameStatusAction.spreadAttack(hostKey, this.target, this.damage ),
     ]},
 }
 
@@ -60,7 +59,7 @@ export const spiralOfLight = {
         {x: 1, y: 1}, 
     ],
     get effect(){ return [ 
-        (playerCoord, entitiesCoord) => GameStatusAction.playerSpreadAttack(playerCoord, entitiesCoord, this.target, this.damage ),
+        (hostKey) => GameStatusAction.spreadAttack(hostKey, this.target, this.damage ),
     ]}
 }
 
@@ -78,7 +77,7 @@ export const snipe = {
         {x: 4, y: 0}
     ],
     get effect(){ return [ 
-        (playerCoord, entitiesCoord) => GameStatusAction.playerSpreadAttack(playerCoord, entitiesCoord, this.target, this.damage ),
+        (hostKey) => GameStatusAction.spreadAttack(hostKey, this.target, this.damage ),
     ]},
 }
 
@@ -94,7 +93,7 @@ export const swipe = {
         {x: 1, y: -1},
     ],
     get effect(){ return [ 
-        (playerCoord, entitiesCoord) => GameStatusAction.playerSpreadAttack(playerCoord, entitiesCoord, this.target, this.damage ),
+        (hostKey) => GameStatusAction.spreadAttack(hostKey, this.target, this.damage ),
     ]},
 }
 

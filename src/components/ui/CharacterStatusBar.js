@@ -1,18 +1,17 @@
 
 import React from 'react';
 import Style from "./../../css/Style.module.css";
-
+import {PLAYER_ID} from "./../../state/constant";
 import { useSelector} from 'react-redux';
 import { useSpring , animated } from 'react-spring';
 
 
 export default function CharacterStatusBar(){
     
-    const HP = useSelector(state => state.game.health);
-    const MaxHP = useSelector(state => state.game.healthLimit);
+    const HP = useSelector(state => state.game.statuses[PLAYER_ID].health);
+    const MaxHP = useSelector(state => state.game.statuses[PLAYER_ID].healthLimit);
     const Money = useSelector(state => state.game.money);
-    const Hour = useSelector(state => state.game.time);
-    
+
 
     
     let healthPercent = Math.floor(HP/MaxHP * 100).toString() + "%";

@@ -54,7 +54,7 @@ function drawCard(state, action){
             console.log("the deck has been empty!");
             break;
         }
-        else newhandList.push(newCard);
+        else newhandList = [...newhandList, newCard];
     }
 
     return updateObject(state, {
@@ -72,16 +72,13 @@ function drawCard(state, action){
  * @param {*} action action.pos
  */
 function discardCard(state, action){
-    let newList = state.handList;
-    let item = newList.splice(action.pos, 1);
-
-    let newPileList = state.pileList;
-    newPileList.push(item);
+    const newList = state.handList;
+    const item = newList.splice(action.pos, 1);
 
     return updateObject(state, {
         ...state,
         handList: newList,
-        pileList: newPileList,
+        pileList: [...state.pileList, item]
     });
 }
 
@@ -163,7 +160,7 @@ function addNewCard(state, action){
         return state;
     }
 
-    newCardList.push(cardKey);
+    newCardList = [...newCardList, cardKey];
     return updateObject( state, {
         ...state,
         cardList: newCardList,

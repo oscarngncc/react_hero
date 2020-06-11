@@ -1,5 +1,5 @@
 
-import React, {useCallback, useState, useRef, useEffect} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import { useSpring, useTrail, animated, useChain } from 'react-spring';
 import {useSelector, useDispatch} from 'react-redux';
 import { useDrop } from 'react-dnd';
@@ -10,12 +10,13 @@ import * as Tile from './../../data/tile/Tile';
 import * as Event from './../../data/event/Event';
 import ClickableCircle from './../ui/ClickableCircle';
 import Player from './../game/Player';
-import EnemyInMap from './../game/EntityInMap';
+import EventComponent from './../game/Event';
 import Entity from './Entity';
-
+import * as Constant from './../../state/constant';
 import CardData from './../../data/card/Card';
 import EntityData from './../../data/entity/Entity';
 import EffectWrapper from './EffectWrapper';
+import {PLAYER_ID} from './../../state/constant';
 
 
 
@@ -42,8 +43,7 @@ export default function Stage(props){
     const playerBattleCoord = useSelector( state => state.map.playerBattleMapCoord);
     const entitiesBattleCoords = useSelector( state => state.map.entityInMap);
     const BattleSteps = useSelector(state => state.game.steps);
-    const turn = useSelector(state => state.game.turn );
-
+    const inputLock = useSelector(state => state.game.inputLock );
 
     //Placeholder, shouldn't be in use
     const defaultMap = [    
@@ -59,8 +59,9 @@ export default function Stage(props){
     const partOfGameCoord = { x: playerGameCoord.x % (colLen-1), y : playerGameCoord.y  };
 
     //entity Statuses
-    const entitiesStatus = useSelector( state => state.game.entitiesStatus );
-    const entitiesInMap = useSelector(state => state.map.entityInMap );
+    const statuses = useSelector( state => state.game.statuses );
+    const entities = useSelector( state => state.game.entities );
+    const playerStatus = statuses[PLAYER_ID];
 
 
     if (partOfGameMap[0].length < colLen ){
@@ -75,59 +76,48 @@ export default function Stage(props){
     //This should be the only ones used by the presentation layer 
     const currentMap = (isBattle) ? battleMap : partOfGameMap;
     const currentPlayerCoord = (isBattle) ? playerBattleCoord : partOfGameCoord;
-    
 
-
-
-
-    /**
-     * Perform Action by certain entity
-     */
-    function performEntityAction(key){
-
-        const type = entitiesStatus[key].type;
-        const Coord = entitiesInMap[key].Coord;
-        const distance = EntityData[type].distance;
-        const style = EntityData[type].style;
-
-        var actions = [];
-        for ( var i = 0; i < distance; i++ ){
-            actions.push(Action.StageAction.moveEntityInBattle(key, style, playerBattleCoord));
-        }
-
-        actions.map( function(action, index){
-            setTimeout( () => {
-                dispatch(action)
-            }, 100 + index * 500 );
-        });
-    }
 
 
 
 
     /**
-     * Generator Function
-     * @param {Function} resume function which has ability to call generator.next() on top of callback func
+     * Generator, which controls the flow of the entityTurn (End of your turn)
+     * @param {Function} callBack function which has ability to call generator.next() on top of callback func
      */
-    function* performEntitiesAction(resume){ 
-        
+    function* performEntitiesAction(callBack){ 
         /**
          * simple async function that will be yielded (here used as delay between entity who sequence of action)
-         * @param {*} time time needed to wait for this async func to execute
-         * @param {*} callback will actually be plugged with function resume()  
-         * @param {*} key unique key of the entity
+         * @param {*} action Action that will be dispatched
+         * @param {*} callback Callback function, which will be callBack() inside generator
+         * @param {*} time 1000
          */
-        function delay(time, callback, key) {
+        function delay( action, callback, time ) {
             setTimeout(function () {
-              callback(key);
+              callback(action);
             }, time);
         }
 
-        for ( var index = 0; index < Object.keys(entitiesStatus).length; index++ ){
-            const key = Object.keys(entitiesStatus)[index];
-            const time = index === 0 ? 0 : 1600;
-            yield delay( time, resume, key );
+
+        //Action start here:
+        for ( var index = 0; index < entities.length; index++ ){
+            const key = entities[index];
+            const type = statuses[key].type;
+            const distance = EntityData[type].distance;
+            const style = EntityData[type].style;
+
+            for ( var count = 0; count < distance; count++ ){
+                const time = (index === 0 && count === 0 ) ? 0 : 400;
+                yield delay(
+                    Action.StageAction.moveEntityInBattle(key, style, playerBattleCoord),
+                    callBack, 
+                    time
+                );
+            }
         }
+       
+        dispatch(Action.GameStatusAction.iterateTurn() )
+        dispatch(Action.GameStatusAction.setInputLock(false))
     }
      
 
@@ -137,41 +127,57 @@ export default function Stage(props){
      * @param {*} generatorFunction 
      */
     function run(generatorFunction) {
-        /**
-         * What resume does here is to call our async function AND 
-         * @param {*} key unique entity key obtained from generator.delay()
-         */
-        function resume(key) {
-            performEntityAction(key);
+        /** 
+        What callback does is to dispatch the action AND called generator.next() to tell generator that
+        it finishes its own job since resumes is called inside delay() as a callback
+        */
+        function callBack(action) {
+            dispatch(action);
             generatorItr.next();
         }
-        var generatorItr = generatorFunction(resume);
+        var generatorItr = generatorFunction(callBack);
         generatorItr.next();
     }
 
 
-    
+
     /**
      * Perform Entity Action upon turn gets updated
      * Including: Doing action one by one
      */
     useEffect(() => {
-        if (turn >= 2 ){
+        if ( inputLock === true ){
             run(performEntitiesAction);
         }
-    }, [turn])
+    }, [inputLock])
 
    
 
+    
+    /**
+     * Since changing playerDirection re-triggers rendering of checkTargetTile
+     * causing it to re-play animation in a different direction. Hence, need to setConsumedCard Back to null
+     */
+    useEffect(() => {
+        setConsumedCard(null);
+    }, [playerStatus.direction]);
+
+
+
+
+    /**
+     * Perform Battle checking if it's ready to be ended
+     */
     useEffect(() => {    
         //Unmount child entity if target has no health
-        Object.keys(entitiesStatus).forEach( function(key){
-            if (entitiesStatus[key].health <= 0){
+        Object.keys(statuses).forEach( function(key){
+            const status = statuses[key];
+            if (  status !== undefined && status !== null && status.health <= 0 ){
                 dispatch(Action.GameStatusAction.entityDefeated(key));       
             }
         });
         //Reset battlemap back if all entities defeated
-        if ( Object.keys(entitiesStatus).length === 0 ){
+        if ( Object.keys(entities).length === 0 ){
             dispatch(Action.GameStatusAction.startBattle(false));
         }
     });
@@ -227,11 +233,12 @@ export default function Stage(props){
 
     /** 
      * use the card, including using its effect and discard it
+     * NOTE: This effect is also used as a method for entity to attack/perform action
      * NOTE: While it seem's weird to handle Card action here, it actually kinda make sense
      * Upon dropping here, the card effect will also have impact on the map itself
      * @param {object} item dragged object info defined by drag-N-drop Card 
     */
-    function consumeCard(item){
+    function consumeCard(item, hostKey=PLAYER_ID ){
         const index = item.index;
         const Card = CardData[item.card];
 
@@ -245,7 +252,7 @@ export default function Stage(props){
         setConsumedCard(item);
         setRefresh(Math.random());
         for (var action in Card.effect ){
-            dispatch( Card.effect[action](playerBattleCoord, entitiesBattleCoords)  );
+            dispatch( Card.effect[action](hostKey)  );
         }  
         dispatch(Action.CardAction.discardCard(index) );
     }
@@ -370,11 +377,10 @@ export default function Stage(props){
     function checkTargetTile(row, column, cardID){
         const Card = CardData[cardID];
         const target = Card.target;
-        if (target === undefined){
-            return false;
-        }
+        const dirMultiplier = ( playerStatus.direction === Constant.DIRECTION.left ) ? -1 :  1;
+        if (target === undefined || target === null ){ return false;}
         for (let i = 0; i < target.length; i++ ){
-            if ( row === currentPlayerCoord.y + target[i].y && column === currentPlayerCoord.x + target[i].x  ){
+            if ( row === currentPlayerCoord.y + target[i].y && column === currentPlayerCoord.x + target[i].x * dirMultiplier  ){
                 return true;
             }
         }
@@ -390,17 +396,16 @@ export default function Stage(props){
      * @param {number} column 
      */
     function renderMapChild(row, column){
-        switch ( partOfEventMap[row][column] ){
-            case Event.PLAYER:
-                return <Player/>;
-            case Event.ENEMY:
-                return <div onClick={() => onClickEvent(row, column)}><EnemyInMap/></div>;
-            default:
-                if (checkMovable(row, column, 1, false) && ! isToNextLevel ){
+        const eventKey = partOfEventMap[row][column];
+        switch ( eventKey ){
+            case Event.EMPTY:
+                if (checkMovable(row, column, 1, false) && ! isToNextLevel  ){
                     return (<ClickableCircle click={() => movePlayer(row, column) } />);
                 }
+                else return <div></div>;
+            default:
+                return <div onClick={() => onClickEvent(row, column)}><EventComponent eventKey={eventKey} /></div>;
         }
-        return <div></div>;
     }
 
 
@@ -423,7 +428,7 @@ export default function Stage(props){
             const attackable = checkMovable(row, column, 1, false) && BattleSteps > 0 ;
             child = <Entity monsterKey={key} attackable={attackable}/>;
         }
-        else if (checkMovable(row, column, 1, false) && BattleSteps > 0 ){
+        else if (checkMovable(row, column, 1, false) && BattleSteps > 0 && ! inputLock  ){
             child = (<ClickableCircle click={() => movePlayer(row, column) } />);
         }
         else { child = <div></div>;}
@@ -475,6 +480,7 @@ export default function Stage(props){
                     })}
                 </ul>
             </animated.div>
+            {props.children}
         </div>
     );    
 }

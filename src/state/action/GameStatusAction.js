@@ -10,6 +10,10 @@ import * as Constant from './../constant';
 //Action
 export const START_GAME  = 'startGame';
 export const START_BATTLE = 'startBattle';
+export const SET_INPUT_LOCK = 'setInputLock';
+export const SET_PLAYER_DIRECTION = 'setPlayerDirection';
+export const SET_ENTITY_DIRECTION = 'setEntityDirection';
+
 export const RESET_STEP = 'resetStep';
 export const INCREMENT_STEPS = 'incrementStep';
 export const INCREMENT_HEALTH = 'incrementHealth';
@@ -17,8 +21,7 @@ export const INCREMENT_MONEY = 'incrementMoney';
 export const INCREMENT_TURN = 'incrementTurn';
 
 
-export const PLAYER_ATTACK = 'playerAttack';
-export const ENTITY_ATTACK = "entityAttack";
+export const ATTACK = 'Attack';
 export const ENTITY_DEFEAT = 'entityDefeated';
 
 
@@ -26,29 +29,28 @@ export const ENTITY_DEFEAT = 'entityDefeated';
 /**
  * Action creator for doing "spread-type" attack
  * NOTE: entitiesCoord is a nested object; targets is an array of Coord object
- * @param {object} playerCoord  player Coord in battleMap
- * @param {object} entitiesCoords entities Coord, should be collected from entityInMap in StageReducer
- * @param {array} targets target by the card
- * @param {number} damage extra damage dealt on top of player's default damage
- * @return  function that fires multiple single attack action 
  */
-export function playerSpreadAttack(playerCoord, entitiesCoords, targets, damage=0 ){
-    const targetEntity = [];
-    
-    targets.forEach(function (Coord){
-        for (var entityKey in entitiesCoords ){
+export function spreadAttack( hostKey, ranges, damage=0  ){  
 
-            const entX = entitiesCoords[entityKey].Coord.x;
-            const entY = entitiesCoords[entityKey].Coord.y;
+    return (dispatch, getState) => {
+        const allCoords = { ...getState().map.entityInMap, [Constant.PLAYER_ID]: { Coord: getState().map.playerBattleMapCoord}  } 
+        const direction = getState().game.statuses[hostKey].direction;
+        const dirMultiplier = (direction === Constant.DIRECTION.left ) ? -1 : 1;
 
-            if ( Coord.x + playerCoord.x === entX && Coord.y + playerCoord.y === entY  ){
-                targetEntity.push(entityKey);
+        let affected = [];
+
+        ranges.forEach( function(Coord){
+            for (var targetKey in allCoords ){
+                const entX = allCoords[targetKey].Coord.x;
+                const entY = allCoords[targetKey].Coord.y;
+                if ( Coord.x * dirMultiplier  + allCoords[hostKey].Coord.x  === entX && Coord.y + allCoords[hostKey].Coord.y === entY  ){
+                    affected.push(targetKey);
+                }
             }
-        }
-    });
-    return dispatch => {
-        targetEntity.forEach( entityKey => {
-            dispatch( playerAttack(entityKey, damage));
+        });
+
+        affected.forEach( function (targetKey) {
+            dispatch( attack(hostKey, targetKey, damage ) );
         });
     }
 }
@@ -62,9 +64,9 @@ export function playerSpreadAttack(playerCoord, entitiesCoords, targets, damage=
  */
 export function iterateTurn(){
     return (dispatch, getState) => {
-        
+        dispatch( incrementTurn(1) );
+
         const deckList = getState().card.deckList;
-        const cardList = getState().card.cardList;
 
         dispatch( CardAction.discardHand());
         if (deckList.length < 4 ){
@@ -80,7 +82,6 @@ export function iterateTurn(){
         }
 
         dispatch( resetStep() );
-        dispatch( incrementTurn(1) );
     }
 }
 
@@ -126,14 +127,16 @@ export function startGame(value){
 
 
 //Simple Action based on Action creator
+export const setInputLock = makeActionCreator(SET_INPUT_LOCK, 'value');
 export const resetStep = makeActionCreator(RESET_STEP, 'value');
 export const incrementStep = makeActionCreator(INCREMENT_STEPS, 'value');
 export const incrementHealth = makeActionCreator( INCREMENT_HEALTH  , 'value' );
 export const incrementMoney = makeActionCreator( INCREMENT_MONEY , 'value');
 export const incrementTurn = makeActionCreator( INCREMENT_TURN , 'value');
-
-export const playerAttack = makeActionCreator(PLAYER_ATTACK, 'entityKey', 'damage');
 export const entityDefeated = makeActionCreator(ENTITY_DEFEAT, 'entityKey');
+export const togglePlayerDirection = makeActionCreator(SET_PLAYER_DIRECTION);
+export const setEntityDirection = makeActionCreator(SET_ENTITY_DIRECTION, 'entityKey', 'direction');
+export const attack = makeActionCreator(ATTACK, 'hostKey', 'targetKey', 'damage')
 
 
 
@@ -141,3 +144,4 @@ export const entityDefeated = makeActionCreator(ENTITY_DEFEAT, 'entityKey');
 export const healToFullHealth = () => incrementHealth(99999);
 export const resetTurn = () => incrementTurn(-99999);
 export const lossAllMoney = () => incrementMoney(-99999);
+export const playerAttack = (entityKey, damage) => attack( Constant.PLAYER_ID , entityKey, damage );

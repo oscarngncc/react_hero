@@ -1,7 +1,6 @@
 
 import React, {useState} from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-
 import Style from "./../../css/Style.module.css";
 import * as Action from './../../state/action/action';
 import { useSpring, animated } from 'react-spring';
@@ -12,8 +11,10 @@ export default function TurnButton(){
     const dispatch = useDispatch();
     const isBattle = useSelector(state => state.game.isBattle );
     const turn = useSelector(state => state.game.turn);
+    const inputLock = useSelector(state => state.game.inputLock );
     const [toggleClick, setToggleClick] = useState(false);
-
+   
+    
 
 
     const initSpring = useSpring({
@@ -36,10 +37,16 @@ export default function TurnButton(){
     });
 
 
-    //Perform Turn-Ended Related Action
+    /**
+     * Perform end-turn based action upon checking current moment is not end-turn
+     * NOTE: setInputLock essentially means the duration of entity's turn to move/attack
+     * The lock only acciqure here, but unlock and turn update is actually done in Stage instead;
+     */
     function onClick(){
-        setToggleClick(!toggleClick);
-        dispatch(Action.GameStatusAction.iterateTurn());
+        if ( !inputLock ){
+            setToggleClick(!toggleClick);
+            dispatch(Action.GameStatusAction.setInputLock(true))
+        }
     }   
 
     

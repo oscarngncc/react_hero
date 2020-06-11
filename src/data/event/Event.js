@@ -16,7 +16,7 @@ export const player = {
 
 export const enemy = {
     key: ENEMY,
-    image: "",
+    image: "Enemy.png",
 }
 
 

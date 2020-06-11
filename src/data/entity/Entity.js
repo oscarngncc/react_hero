@@ -2,7 +2,6 @@
 import {StageAction } from './../../state/action/action';
 import { MOVE_STYLE } from '../../state/constant';
 
-
 export const GHOST = "ghost";
 export const MELODY = "melody";
 
@@ -26,7 +25,7 @@ export const melody = {
     reward: 10,
     style: MOVE_STYLE.offense,
     get actions(){ return [ 
-       
+        
     ]},
 }
 

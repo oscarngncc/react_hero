@@ -11,6 +11,7 @@ import Menu from './components/ui/Menu';
 import GameBackGround from './components/ui/GameBackGround';
 import TopSection from './components/ui/TopSection';
 import TurnButton from './components/ui/TurnButton';
+import CardStat from './components/ui/CardStat';
 
 import CustomDragLayer from './components/ui/CustomDragLayer';
 
@@ -45,8 +46,10 @@ function App() {
                       <AppBar/>
                     </TopSection>
                     <CustomDragLayer />
-                    <Stage/>
-                    <TurnButton/>
+                    <Stage>
+                      <TurnButton/>
+                    </Stage>
+                    <CardStat />
                     <div className={Style.cardSection} align="center">
                       {( isBattle ? <HandDraw/> : <div></div> )}
                     </div> 
@@ -63,3 +66,5 @@ function App() {
 export default App;
 
 
+
+// <GameBackGround align="center"></GameBackGround>

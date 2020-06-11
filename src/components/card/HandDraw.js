@@ -1,6 +1,6 @@
 
 import React, {useState, useRef, useEffect} from 'react' ;
-import {useSpring, useTrail, animated} from 'react-spring';
+import {useTransition, useTrail, animated} from 'react-spring';
 
 import * as Action from './../../state/action/action';
 import * as Constant from './../../state/constant';
@@ -14,8 +14,10 @@ import { useDragLayer } from 'react-dnd'
 
 
 export default function HandDraw(){
+    const inputLock = useSelector(state => state.game.inputLock);
     const cardList = useSelector(state => state.card.handList);
     const [isProtrait, setisProtrait] = useState(window.innerHeight / window.innerWidth > 1 ? true : false);
+    
 
     
     useEffect(() => {
@@ -33,23 +35,26 @@ export default function HandDraw(){
     }));
     
 
-
+    const hideCard = { transform: "translate(-10rem, 30rem)", opacity: 0.6,  };
+    const showCard = { transform:  "translate(0, 0)", opacity: 1.0, };
     const [initTrail, setInitTrail] = useTrail( cardList.length, function(){
         return {
-            from: { 
-                transform: "translate(-10rem, 30rem)",
-                opacity: 0.6, 
-            },
-            to: {
-                transform: "translate(0, 0)", 
-                opacity: 1.0,
-            },
+            from: hideCard,
+            to: showCard,
             config:  { mass: 2, tension: 600, friction: 55 },
-            reset: true,
+            reset: false,
         };
     });
 
+    useEffect(() => {
+        if (inputLock){
+            setInitTrail( {from: showCard, to: hideCard} );
+        } else {
+            setInitTrail( {from: hideCard, to: showCard} );
+        }
+    }, [inputLock])
 
+    
 
 
     /**
@@ -69,14 +74,19 @@ export default function HandDraw(){
             let dynamicMargin = `0rem ${distance}rem`;
             let topDist="";
 
+            //Only One Layer
             if (cardList.length <= cardsPerLayer ){
                 topDist="-12rem";
-            } else {
+            } 
+            //More than one layer (i.e. 2)
+            else {
                 if (index < cardsPerLayer ){
-                    topDist="0rem";
+                    //TOP
+                    topDist="-5rem";
                 }
                 else { 
-                    topDist="-7.5rem";
+                    //DOWN
+                    topDist="-12rem";
                 }
             }
 
@@ -133,13 +143,13 @@ export default function HandDraw(){
             key={index}
             >
                 <animated.div 
-                style={{ ...animation } }
+                style={{  ...animation  } }
                 >
                    <div>
                         <Card 
-                        clickable={true} 
+                        clickable={!inputLock} 
                         hoverable={true} 
-                        draggable={true}
+                        draggable={!inputLock}
                         index={index}
                         card={cardList[index] } 
                         />
@@ -148,6 +158,7 @@ export default function HandDraw(){
             </li>
         );
    }
+
 
    return (
     <ul class={Style.handDraw}>
