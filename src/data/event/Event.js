@@ -1,4 +1,7 @@
 
+
+import { GameStatusAction } from "../../state/action/action";
+
 export const EMPTY = 0;
 export const PLAYER = 1;
 export const ENEMY = 2;
@@ -17,6 +20,8 @@ export const player = {
 export const enemy = {
     key: ENEMY,
     image: "Enemy.png",
+    isFloat: true,
+    action: () => GameStatusAction.startBattle(true),
 }
 
 

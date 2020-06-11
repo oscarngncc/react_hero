@@ -103,16 +103,32 @@ export function generateGamePath(pathLength, splitChanceNum ){
  * @return Action containing 2D array of randomized events
  */
 export function generateEvent(pathLength){
-  let rows = stageRow;
-  let cols = pathLength;
-  let eventsInMap = Array(rows).fill().map(() => Array(cols).fill( Event.EMPTY  ));
+  return (dispatch, getState ) => {
+    const rows = stageRow;
+    const cols = pathLength;
+    const gameMap = getState().map.gameMap ?? null;
+    console.log(gameMap.length);
+    if ( ! Array.isArray(gameMap) || gameMap.length === 0 || ! Array.isArray(gameMap[0]) || pathLength > gameMap[0].length  ){ 
+      return; 
+    }
 
-  //Debug
-  eventsInMap[2][2] = Event.ENEMY;
+    let eventsInMap = Array(rows).fill().map(() => Array(cols).fill( Event.EMPTY  ));
 
-  return {
-    type: GENERATE_EVENT,
-    map: eventsInMap,
+    for (let i = 0; i < 10; i++ ){
+      const randX = Math.floor(Math.random() * rows );
+      const randY = Math.floor(Math.random() * cols );
+      const tile = gameMap[randX][randY] ?? null; 
+      if (  tile !== null && Tile.default[tile].movable === true  ){
+        eventsInMap[randX][randY] = Event.ENEMY;
+      }
+    }
+    //Debug to always generate
+    eventsInMap[2][2] = Event.ENEMY;
+
+    dispatch({
+      type: GENERATE_EVENT,
+      map: eventsInMap,
+    });
   }
 }
 
@@ -132,6 +148,7 @@ export function generateBattleMap(){
     col: stageColumn,
   }
 }
+
 
 
 /**

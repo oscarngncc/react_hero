@@ -26,5 +26,5 @@ export const DIRECTION = {
     down: "down",
 }
 
-export const PLAYER_ID = -55;
+export const PLAYER_ID = "-55";
 export const END_OF_ENDTURN = 999;

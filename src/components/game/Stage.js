@@ -16,7 +16,7 @@ import * as Constant from './../../state/constant';
 import CardData from './../../data/card/Card';
 import EntityData from './../../data/entity/Entity';
 import EffectWrapper from './EffectWrapper';
-import {PLAYER_ID} from './../../state/constant';
+import {PLAYER_ID, STAGE_COL, STAGE_ROW} from './../../state/constant';
 
 
 
@@ -25,14 +25,17 @@ export default function Stage(props){
 
     const dispatch = useDispatch();
     const [isToNextLevel, setToNextLevel] = useState(false);
-    const [consumedCard, setConsumedCard] = useState(null);
     
+    //state related to previous card usage
+    const [cardUsed, setCardUsed ] = useState(null);
+    const [cardUser, setCardUser ] = useState(null);
+
     //NOT IDEAL!! USED FOR REFRESH GIF
     const [refresh, setRefresh] = useState( Math.random()  );
 
 
-    const rowLen = 4;
-    const colLen = 5;
+    const rowLen = STAGE_ROW;
+    const colLen = STAGE_COL;
     const totalLen = rowLen * colLen;
 
     const isBattle = useSelector(state => state.game.isBattle);
@@ -78,6 +81,14 @@ export default function Stage(props){
     const currentPlayerCoord = (isBattle) ? playerBattleCoord : partOfGameCoord;
 
 
+    /**
+     * get actual coordinate in the whole gamemap based on partial of the gamemap
+     * @param {number} column column value presented in "partOf" (presentation layer)
+     */
+    function getFullCoordFromPart(row, column){
+        return { x: column % (colLen) + partIndex, y: row };
+    }
+
 
 
 
@@ -90,7 +101,7 @@ export default function Stage(props){
          * simple async function that will be yielded (here used as delay between entity who sequence of action)
          * @param {*} action Action that will be dispatched
          * @param {*} callback Callback function, which will be callBack() inside generator
-         * @param {*} time 1000
+         * @param {*} time in ms
          */
         function delay( action, callback, time ) {
             setTimeout(function () {
@@ -105,18 +116,35 @@ export default function Stage(props){
             const type = statuses[key].type;
             const distance = EntityData[type].distance;
             const style = EntityData[type].style;
+            const cards =EntityData[type].cards ?? [];
 
+            //Move Entity first
             for ( var count = 0; count < distance; count++ ){
                 const time = (index === 0 && count === 0 ) ? 0 : 400;
                 yield delay(
-                    Action.StageAction.moveEntityInBattle(key, style, playerBattleCoord),
+                    () => { 
+                        if (cardUsed !== null ){
+                            setCardUsed(null);
+                            setCardUser(null);
+                        }
+                        dispatch(Action.StageAction.moveEntityInBattle(key, style, playerBattleCoord));
+                    },
+                    callBack, 
+                    time
+                );
+            }
+            //Perform cards afterwards
+            for (var count = 0; count < cards.length; count++ ){
+                const time = (index === 0 && count === 0 ) ? 0 : 400;
+                const cardID = cards[count];
+                yield delay(
+                    () => runCardEffect(cardID, key),
                     callBack, 
                     time
                 );
             }
         }
-       
-        dispatch(Action.GameStatusAction.iterateTurn() )
+        dispatch(Action.GameStatusAction.iterateTurn())
         dispatch(Action.GameStatusAction.setInputLock(false))
     }
      
@@ -124,21 +152,18 @@ export default function Stage(props){
     
     /**
      * Helper function for the generator
+     * What callback does is to dispatch the action AND called generator.next() to tell generator that
+     * it finishes its own job since resumes is called inside delay() as a callback
      * @param {*} generatorFunction 
      */
     function run(generatorFunction) {
-        /** 
-        What callback does is to dispatch the action AND called generator.next() to tell generator that
-        it finishes its own job since resumes is called inside delay() as a callback
-        */
-        function callBack(action) {
-            dispatch(action);
+        function callBack(func) {
+            func();
             generatorItr.next();
         }
         var generatorItr = generatorFunction(callBack);
         generatorItr.next();
     }
-
 
 
     /**
@@ -151,17 +176,15 @@ export default function Stage(props){
         }
     }, [inputLock])
 
-   
-
     
     /**
-     * Since changing playerDirection re-triggers rendering of checkTargetTile
-     * causing it to re-play animation in a different direction. Hence, need to setConsumedCard Back to null
+     * Since changing playerDirection re-triggers rendering of battle child
+     * causing it to re-play animation in a different direction. Hence, need to setCardUsed Back to null
      */
     useEffect(() => {
-        setConsumedCard(null);
+        setCardUsed(null);
+        setCardUser(null);
     }, [playerStatus.direction]);
-
 
 
 
@@ -172,7 +195,7 @@ export default function Stage(props){
         //Unmount child entity if target has no health
         Object.keys(statuses).forEach( function(key){
             const status = statuses[key];
-            if (  status !== undefined && status !== null && status.health <= 0 ){
+            if (  status !== undefined && status !== null && status.health <= 0 && key != PLAYER_ID ){
                 dispatch(Action.GameStatusAction.entityDefeated(key));       
             }
         });
@@ -180,38 +203,7 @@ export default function Stage(props){
         if ( Object.keys(entities).length === 0 ){
             dispatch(Action.GameStatusAction.startBattle(false));
         }
-    });
-
-
-
-    /* ------ Animation Related ------ */
-    const initMapRef = useRef();
-    const initMap = useSpring({
-        from: { transform: "translateY(-150rem)"},
-        to: { transform: "translateX(0rem)"},
-        config:  { mass: 5, tension: 400, friction: 60 },
-        ref: initMapRef,
-    });
-    
-    const initTrailRef = useRef();
-    const initTrail = useTrail( totalLen, {
-       from: { transform: "translateY(-150rem)"},
-       to: { transform: "translateY(0rem)"},
-       config:  { mass: 4, tension: 2000, friction: 140 },
-       ref: initTrailRef,
-    });
-    useChain([initMapRef, initTrailRef]);
-
-    const nextLevelSpring = useSpring({
-        from: { transform: "translateX(5rem)", opacity: 0.7 },
-        to: { transform: "translateX(0rem)", opacity: 1 },
-        reset: true,
-        onRest: () => {
-            if (isToNextLevel){
-                setToNextLevel(false);
-            }
-        } 
-    })
+    }, [statuses, entities] );
 
 
 
@@ -231,29 +223,47 @@ export default function Stage(props){
 
 
 
-    /** 
-     * use the card, including using its effect and discard it
-     * NOTE: This effect is also used as a method for entity to attack/perform action
-     * NOTE: While it seem's weird to handle Card action here, it actually kinda make sense
-     * Upon dropping here, the card effect will also have impact on the map itself
-     * @param {object} item dragged object info defined by drag-N-drop Card 
-    */
-    function consumeCard(item, hostKey=PLAYER_ID ){
-        const index = item.index;
-        const Card = CardData[item.card];
+    /**
+     * Simply use Card Effect
+     * NOTE: This is called by both player and entity when using the card effect
+     * @see consumeCard
+     * @param {*} cardID id of the card
+     * @param {*} hostKey id of the host (in redux) using the card
+     * @returns {boolean} true if successfully use the card
+     * 
+     */
+    function runCardEffect(cardID, hostKey=PLAYER_ID ){
+        const Card = CardData[cardID] ?? {};
 
-        let usable = true;
         for (var condition in Card.effect ){
+            //return false if needed
         }
-        if (!usable){ return; }
-
         //Force Update of the dragged card
-        setConsumedCard(null);  
-        setConsumedCard(item);
-        setRefresh(Math.random());
         for (var action in Card.effect ){
             dispatch( Card.effect[action](hostKey)  );
-        }  
+        }
+        //Force Animation of the card
+        setCardUser(hostKey);
+        setCardUsed(null);  
+        setCardUsed(cardID);
+        setRefresh(Math.random());
+        return true;  
+    }
+
+
+
+    /** 
+     * use the card in hand, including using its effect and discard it
+     * @param {object} item info received upon DND, contain card index in hand and cardID 
+    */
+    function consumeCard(item){
+        const index = item.index;
+        const cardID = item.card;
+        
+        //Use effect
+        const usable = runCardEffect(cardID, PLAYER_ID );
+        if ( ! usable ) return;
+
         dispatch(Action.CardAction.discardCard(index) );
     }
 
@@ -311,18 +321,6 @@ export default function Stage(props){
         return null;
     }
 
-    
-
-    
-    /**
-     * get actual column value in the whole gamemap from column value of part of the gamemap
-     * @param {number} column column value presented in "partOf" (presentation layer)
-     */
-    function getFullColumnFromPart(column){
-        return column % (colLen) + partIndex;
-    }
-    
-
 
     /**
      * Move the Player in Map, usable for both map and battle
@@ -331,10 +329,7 @@ export default function Stage(props){
      * @param {number} column 
      */
     function movePlayer(row, column){
-        if (consumeCard !== null ){
-            setConsumedCard(null);
-        }
-
+        if ( cardUsed !== null ){ setCardUsed(null); setCardUser(null); }
         if ( isBattle ){
             let coord = { x: column, y: row };
             let move = Action.StageAction.movePlayerInBattle(coord);
@@ -342,7 +337,7 @@ export default function Stage(props){
             dispatch(Action.GameStatusAction.incrementStep(-1));
         }
         else {
-            let coord = {  x: getFullColumnFromPart(column), y: row,};
+            let coord = getFullCoordFromPart(row, column);
             let move = Action.StageAction.movePlayerInMap(coord);
             if ( column===colLen -1 ){
                 setToNextLevel(true);
@@ -360,7 +355,7 @@ export default function Stage(props){
     * @param {*} column X index of the event
     */
     function onClickEvent(row, column){
-        let coord = { x: column, y: row };
+        let coord = getFullCoordFromPart(row, column);
         dispatch(Action.StageAction.clearEventInMap(coord));
         dispatch(Action.StageAction.movePlayerInMap(coord));
     }
@@ -368,25 +363,60 @@ export default function Stage(props){
 
 
     /**
-     * Check if the tile will be in range of player's card upon drag-n-drop a specific card
-     * @param {number} row row of the tile
-     * @param {number} column column of the tile
-     * @param {String} cardID  card ID of the card (e.g. "forward")
-     * @return {boolean} true if it will be
+     * Check if the tile will be used to display animation
+     * NOTE: user can be the player or 
+     * @param {*} row coordinate of tile
+     * @param {*} column coordinate of tile
+     * @param {*} cardID ID of the card (default last used card)
+     * @param {*} userID ID of the user (default last card user)
+     * @returns true if effect going to apply there
      */
-    function checkTargetTile(row, column, cardID){
-        const Card = CardData[cardID];
-        const target = Card.target;
-        const dirMultiplier = ( playerStatus.direction === Constant.DIRECTION.left ) ? -1 :  1;
-        if (target === undefined || target === null ){ return false;}
+    function checkEffect(row, column, cardID = cardUsed , userID = cardUser ){
+        if (userID === null || userID === undefined ){ return false; }
+
+        const Card = CardData[cardID] ?? {};
+        const target = Card.target ?? [];
+        const userCoord = ( userID === PLAYER_ID ) ? currentPlayerCoord : entitiesBattleCoords[userID].Coord;
+        const dirMultiplier = ( statuses[userID].direction === Constant.DIRECTION.left  ) ? -1 : 1;
+
         for (let i = 0; i < target.length; i++ ){
-            if ( row === currentPlayerCoord.y + target[i].y && column === currentPlayerCoord.x + target[i].x * dirMultiplier  ){
+            if ( row === userCoord.y + target[i].y && column === userCoord.x + target[i].x * dirMultiplier  ){
                 return true;
             }
         }
         return false;
     }
 
+
+
+
+    /* ------ Animation Related ------ */
+    const initMapRef = useRef();
+    const initMap = useSpring({
+        from: { transform: "translateY(-150rem)"},
+        to: { transform: "translateX(0rem)"},
+        config:  { mass: 5, tension: 400, friction: 60 },
+        ref: initMapRef,
+    });
+    const initTrailRef = useRef();
+    const initTrail = useTrail( totalLen, {
+    from: { transform: "translateY(-150rem)"},
+    to: { transform: "translateY(0rem)"},
+    config:  { mass: 4, tension: 2000, friction: 140 },
+    ref: initTrailRef,
+    });
+    useChain([initMapRef, initTrailRef]);
+
+    const nextLevelSpring = useSpring({
+        from: { transform: "translateX(5rem)", opacity: 0.7 },
+        to: { transform: "translateX(0rem)", opacity: 1 },
+        reset: true,
+        onRest: () => {
+            if (isToNextLevel){
+                setToNextLevel(false);
+            }
+        } 
+    })
 
     
 
@@ -398,6 +428,8 @@ export default function Stage(props){
     function renderMapChild(row, column){
         const eventKey = partOfEventMap[row][column];
         switch ( eventKey ){
+            case Event.PLAYER:
+                return <Player key="Player" />
             case Event.EMPTY:
                 if (checkMovable(row, column, 1, false) && ! isToNextLevel  ){
                     return (<ClickableCircle click={() => movePlayer(row, column) } />);
@@ -417,9 +449,8 @@ export default function Stage(props){
      * @param {number} column 
      */
     function renderBattleChild(row, column){
-        
+        //check which child to render
         let child = null;
-        
         if (currentPlayerCoord.y === row && currentPlayerCoord.x === column ){
             child = <Player key="Player" />;
         }
@@ -433,7 +464,9 @@ export default function Stage(props){
         }
         else { child = <div></div>;}
 
-        const isEffect = (consumedCard !== null && checkTargetTile(row, column, consumedCard.card) ) ?  CardData[consumedCard.card].particle : undefined;
+
+        //check if effect is used in that tile
+        const isEffect = ( checkEffect(row, column, cardUsed, cardUser) ) ?  CardData[cardUsed].particle : undefined;
         return <EffectWrapper effect={isEffect} refresh={refresh} >{child} </EffectWrapper>;
     }
 
@@ -459,12 +492,14 @@ export default function Stage(props){
                     {currentMap.map((row, rowIndex) => {
                         return row.map((column, colIndex) => {
                         
-                            let index = rowIndex * 5 + colIndex;
+                            let index = rowIndex * STAGE_COL + colIndex;
                             let tileStyle = Tile.default[column.toString()].style;  
 
-                            //Change to Attack Tile upon hover
-                            if (isOver && checkTargetTile(rowIndex, colIndex, item.card) ){
-                                tileStyle = Tile.default[Tile.ATTACK_TILE].style;
+                            //Detect Attack Tile upon hover
+                            if (isBattle){
+                                if (isOver && checkEffect(rowIndex, colIndex, item.card, PLAYER_ID) ){
+                                    tileStyle = Tile.default[Tile.ATTACK_TILE].style;
+                                }
                             }
                             
                             return (

@@ -1,4 +1,4 @@
-
+import * as Card from './../card/Card';
 import {StageAction } from './../../state/action/action';
 import { MOVE_STYLE } from '../../state/constant';
 
@@ -9,12 +9,13 @@ export const MELODY = "melody";
 export const ghost = {
     key: GHOST,
     image: "Ghost.png",
+    distance: 3,
     health: 20,
     reward: 10,
-    distance: 3,
+    attack: 1,
     style: MOVE_STYLE.random,
-    get actions(){ return [ 
-        
+    get cards(){ return [ 
+        Card.SPRIAL_OF_LIGHT,
     ]},
 }
 
@@ -24,7 +25,7 @@ export const melody = {
     health: 15,
     reward: 10,
     style: MOVE_STYLE.offense,
-    get actions(){ return [ 
+    get cards(){ return [ 
         
     ]},
 }

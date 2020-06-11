@@ -154,7 +154,7 @@ function generateEntitiesInBattle(state, action){
         newEntitiesStatus[key].healthLimit = entity.health;
         newEntitiesStatus[key].reward = entity.reward;
         newEntitiesStatus[key].direction = Constant.DIRECTION.left;
-
+        newEntitiesStatus[key].attack = entity.attack;
         entities.push(key);
     }
     return updateObject( state, {

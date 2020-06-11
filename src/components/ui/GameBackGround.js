@@ -1,40 +1,52 @@
 
 import React, { useState, useEffect } from 'react';
 import {useSprings, animated} from 'react-spring';
+import {useSelector} from 'react-redux';
 
 
 import Style from './../../css/Style.module.css';
 
+
+
+
 export default function GameBackground(props){
     const particleNum = 30;
     const particleArr = new Array(particleNum).fill(0);
-    const [ bgChoice, setbgChoice] = useState(1);
+    const isBattle = useSelector(state => state.game.isBattle);
+    const [ bgChoice, setbgChoice] = useState( 2 );
+
+    useEffect(() => {
+        setbgChoice( isBattle ? 1 : 2 )
+    }, [isBattle])
     
 
     const snowSprings = useSprings(particleNum, particleArr.map( function(item){ 
         let xStart = Math.floor(Math.random() * 100);
         let yStart = (Math.floor(Math.random() * 20) + 20) * -1;
-        let delay = Math.floor(Math.random() * 5000);
+        let delay = Math.floor(Math.random() * 10000);
         xStart = xStart.toString() + "vw";
         yStart = yStart.toString() + "vh";
+
+        const startStyle = {
+            opacity: 0.8, 
+            top: yStart,
+            left: xStart, 
+        }
         return ({
-            from: {
-                opacity: 0.8, 
-                top: yStart,
-                left: xStart, 
-            },
+            from: startStyle,
             to: async next => {
                 while(true){
                     let xEnd = Math.floor(Math.random() * 100);
                     let yEnd = Math.floor(Math.random() * 20) + 80;
                     xEnd = xEnd.toString() + "vw";
                     yEnd = yEnd.toString() + "vh";
-
+                    
                     await next({
                         opacity: 0,
                         top: yEnd, 
                         left: xEnd,
                     });
+                    await next(startStyle);
                 }
             },
             reset: true,
@@ -42,6 +54,7 @@ export default function GameBackground(props){
             config: { mass: 1, tension: 50, friction: 100 },
         });
     }));
+
 
 
     const [laserSprings, setLaser, stopLaser] = useSprings(particleNum, function(index){ 
@@ -77,9 +90,9 @@ export default function GameBackground(props){
 
 
     const Option = [
+        {particle: {}, springs: {}},
         {particle: Style.snowParticle, springs: snowSprings },
         {particle: Style.laserParticle, springs: laserSprings },
-        {particle: {}, springs: {}},
     ];
 
 
@@ -104,3 +117,4 @@ export default function GameBackground(props){
     </div>
     );
 } 
+

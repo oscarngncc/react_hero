@@ -1,40 +1,35 @@
 
-import React from 'react';
+import React, {useEffect} from 'react';
 import { useDispatch } from 'react-redux';
 import {useSpring, animated} from 'react-spring';
 import EventData from './../../data/event/Event';
 import Style from './../../css/Style.module.css';
 import * as Action from '../../state/action/action';
+import FloatingEvent from './FloatingEvent';
 
 
 export default function Event({eventKey}){
     const dispatch = useDispatch();
     const event = EventData[eventKey];
     const image = require("./../../asset/event/" + event.image );
+    const action = event.action;
+    const isFloatingEvent = event.isFloat ?? false;
 
-    function triggerBattle(){
-        dispatch(Action.GameStatusAction.startBattle(true));
+
+    function trigger(){
+        if (action !== undefined ){
+            dispatch( action() );
+        }
     }
+    
+    
+    const renderImage = <img draggable="false" src={image} class={ `${Style.stageImage}` } alt={"Event"}/>;
+    const renderEvent = (isFloatingEvent) ? <FloatingEvent>{renderImage}</FloatingEvent> : renderImage;
 
-    const defaultCSS = {transform: "rotateY(0deg)"}
-
-    /*
-    const [rotateSpring, set, stop] = useSpring( () => ({
-        from: defaultCSS,
-        to: async (next) => { 
-            while (1){
-                await next({transform: "rotateY(360deg)"});
-            }
-        },
-        delay: 200,
-    }));
-    */
 
     return (
-        <div class={Style.stageObject} onClick={() => triggerBattle()}>
-            <animated.div style={{}} >
-                <img draggable="false" src={image} class={ `${Style.stageImage}` } alt={"Event"} />
-            </animated.div>
+        <div class={Style.stageObject} onClick={() => trigger()}>
+           {renderEvent}
         </div>
     );
 }
