@@ -45,7 +45,6 @@ export default function Entity(props){
         }
     }, [direction]);
 
-
    
     /**
      * Trigger Attack effect
@@ -69,7 +68,6 @@ export default function Entity(props){
     }
 
 
-
     let afterEffect = null;
     let effect = null;
     
@@ -78,12 +76,10 @@ export default function Entity(props){
         effect= "Attack.gif";
     }
 
-
-
     const mirrorStyle = (  direction === DIRECTION.right ) ? Style.mirror : {};  
     //<DialogBox></DialogBox>
     return (
-        <EffectWrapper afterEffect={afterEffect} effect={effect} > 
+        <EffectWrapper afterEffect={afterEffect} effect={effect} refresh={Math.random()} > 
             <div 
             class={Style.stageObject} 
             onClick={onClickAttack} 

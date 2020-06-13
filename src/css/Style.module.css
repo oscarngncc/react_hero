@@ -13,11 +13,12 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-size: 1.6vmin;
   list-style-type: none;
-  font-family: Arial, Helvetica, sans-serif;
+  font-size: max(1.6vmin, 10px );
+  font-weight: 250;
   color: whitesmoke;
   user-select: none;
+  font-family: Arial, Helvetica, sans-serif;
 
   /*Global Variable*/
   --bar-height: 7vmin;
@@ -25,20 +26,43 @@
   --card-height: min(16rem, 16vw);
   --stage-height: min(36rem, 32vw);
   --stage-width: min(100rem, 90vw);
+  --library-height: 90vh;
+  --library-width: min(90vw, 60rem);
+  --menu-width: min(40rem, 90vw);
+
   --map-row: 4;
   --map-column: 5;
 
   /*Theme related */
-  --bg-black: rgb(24, 24, 24);
-  --deep-white: rgb(250, 250, 250);
+  --gentle-font: Arial, Helvetica, sans-serif;
+  --game-font: "Arial Black", Gadget, sans-serif;
+
+  --bg-black: rgb(50,50,50);
+  --darker-black: rgb(40,40,40);
+  --deep-white: #F9F9F9;
   --smoke-white: whitesmoke;
+  --slight-white: #F3F3F3;
+
+  --theme-orange: #F5660C;
+  --theme-red: #F16A70;
+  --material-shadow: 0 3px 6px rgba(255,255,255,0.5), 0 3px 6px rgba(255,255,255,0.63);
 }
 
 
-
-@media only screen and (orientation: portrait ) {
+@media only screen and (max-width: 1200px ){
   * {
-    font-size: 2.1vmin;
+    font-size: max(1.5vmin, 14px );
+    --card-width: max(12rem, 21vw);
+    --card-height: max(16rem, 28vw);
+    --stage-width: max(36rem, 85vw);
+    --stage-height: min(100rem, 40vh);
+  }
+}
+
+
+@media only screen and (orientation: portrait ) and (max-width: 800px) {
+  * {
+    font-size: max(2.2vmin, 11px);
     --card-width: max(12rem, 21vw);
     --card-height: max(16rem, 28vw);
     --stage-width: max(36rem, 85vw);
@@ -94,7 +118,7 @@ body {
 
 
 .stage {
-  margin: 6rem 0rem 1rem 0rem;
+  margin: 4rem 0rem 1rem 0rem;
   height: calc( var(--stage-height) + 1rem);
   width: var(--stage-width);
 }
@@ -108,12 +132,11 @@ body {
   z-index: 1;
   
   transform: perspective(150rem) rotateX(10deg);
-  box-shadow: 0 12.5px 100px -10px rgba(50, 50, 73, 0.4), 0 10px 10px -10px rgba(50, 50, 73, 0.3);
+  box-shadow: 0 12.5px 100px -10px rgba(245, 245, 245, 0.35), 0 10px 10px -10px rgba(245, 245, 245, 0.3);
   border-radius: 2.0rem;
-  background:  
-  var(--deep-white)
-  linear-gradient(rgba(0,0,0, 0.1),rgba(0,0,0, 0.1)) 50% 100%/calc(100% - 1rem) 1rem; 
+  background:  linear-gradient(rgba(0,0,0,0.15),rgba(0,0,0,0.15)) 50% 100%/calc(100% - 1rem) 1rem; 
   background-repeat: no-repeat;  
+  background-color: var(--deep-white);
 
   transition: box-shadow 0.3s ease-out;
 }
@@ -253,7 +276,6 @@ body {
 
 
 .deck {
-  overflow: visible;
   position: relative;
   white-space: nowrap;
   top: 1rem;
@@ -311,7 +333,7 @@ body {
   border-radius: 0.5rem;
   overflow: visible;
   position: relative;
-  
+  cursor: grab;
   transition: transform 0.3s ease-out;
 }
 
@@ -370,22 +392,47 @@ body {
 ************* UI-Related-Stuff *******************
 */
 
-
 .mainMenu {
-  position: absolute;
-  top: 25%;
-  right: 25%;
-  left: 25%;
-  bottom: 25%;
+  margin: 2rem;
+  overflow: hidden;
+  z-index: 1;
+  background-color: var(--darker-black);
+  box-shadow: var(--material-shadow);
+
+
+  /* Dynamic, defined in spring */
+  width: var(--menu-width);
+  height: 90vh;
+}
+
+
+.headerImage {
+  height: 80%;
+  width: 80%;
+  object-fit: contain;
 }
 
 
 .mainMenuItem {
   margin: 1rem;
-  color: white;
+  color: var(--smoke-white);
   font-size: 3.5rem;
+  cursor:pointer;   
 }
 
+
+.mainMenuItem::after{
+  display: block;
+  width: 0%;
+  margin-top: 0.2rem;
+  border-bottom: 2px solid var(--theme-red);
+  content: '';
+  transition: all 300ms ease-in-out;
+}
+
+.mainMenuItem:hover::after {
+  width: 5%;
+}
 
 
 .topSection {
@@ -418,7 +465,7 @@ body {
 	height: 2.8rem;
 	transform: skew(20deg);
   background-color: transparent;
-  border: solid 0.2rem white;
+  border: solid 0.2rem var(--slight-white);
   display: inline-block;
   overflow: hidden;
 }
@@ -429,7 +476,7 @@ body {
   height: 1.7rem;
   transform: skew(20deg);
   background-color: transparent;
-  border: solid 0.15rem white;
+  border: solid 0.15rem var(--slight-white);
   display: inline-block;
 }
 
@@ -441,7 +488,7 @@ body {
   top:0;
   left:0;
   display:block;
-  background-color: white;
+  background-color: var(--slight-white);
  
 }
 
@@ -555,3 +602,110 @@ body {
   border-radius: 0.3rem;
 }
 
+
+.gameProgress, .gameProgressBar {
+  display: flex;
+  align-items : center;
+  justify-content: center;
+}
+
+
+.gameProgressBar {
+  position: relative;
+  z-index: 1;
+  height: 3rem;
+  border-radius: 0.5rem;
+  margin: 0.5rem;
+  background-color: var(--slight-white);
+  box-shadow: var(--material-shadow);
+}
+
+
+.gameProgressBar div{
+  color: var(--darker-black);
+  margin: 1rem;
+  font-size: 1.5rem;
+}
+
+
+
+
+/*
+* Library Related ------------------------------
+*/
+
+.library {
+  background-color: var(--darker-black);
+  box-shadow: var(--material-shadow);
+  z-index: 2;
+
+  margin: 1rem;
+  padding: 1rem;
+  height: var(--library-height);
+  width: var(--library-width);
+  overflow: auto;
+ 
+
+  scrollbar-color: gray transparent ;
+  scrollbar-width: thin;
+}
+
+
+ /* width */
+.library::-webkit-scrollbar {
+  width: 5px;
+}
+/* Track */
+.library::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px grey;
+  border-radius: 10px;
+}
+/* Handle */
+.library::-webkit-scrollbar-thumb {
+  background: gray;
+  border-radius: 10px;
+} 
+
+
+.librarySelection {
+  height: 3rem;
+}
+
+
+.selectionTab {
+  margin: 0rem 0.5rem;
+  cursor: pointer;
+  font-size: 1.5rem;
+  float: left;
+}
+
+
+.libraryItemSection{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  overflow-y: auto;
+}
+
+.libraryItem::before {
+  content: "";
+  padding: 0.5rem 1.5rem;
+  border-top: solid thin var(--theme-red);
+}
+
+.libraryItem {
+  width: 25rem;
+  margin: 3rem 1rem;
+}
+
+
+.effectInLibrary {
+  position: relative;
+  top: 0; 
+  margin-top: 0.5rem;
+  cursor: pointer;
+  border: solid thin var(--theme-red);
+  border-radius: 5%;
+  height: 5rem;
+  width: 5rem;
+}

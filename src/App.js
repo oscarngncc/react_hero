@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 
 import Style from './css/Style.module.css';
 import Stage from './components/game/Stage';
+import BattleStage from './components/game/BattleStage';
 import HandDraw from './components/card/HandDraw';
 import StatusBar from './components/ui/CharacterStatusBar';
 import AppBar from './components/ui/AppBar';
@@ -11,51 +12,46 @@ import Menu from './components/ui/Menu';
 import GameBackGround from './components/ui/GameBackGround';
 import TopSection from './components/ui/TopSection';
 import TurnButton from './components/ui/TurnButton';
-import CardStat from './components/ui/CardStat';
-
 import CustomDragLayer from './components/ui/CustomDragLayer';
-
-
-import { DndProvider } from 'react-dnd-multi-backend';
-import HTML5toTouch from 'react-dnd-multi-backend/dist/esm/HTML5toTouch';
-
-//import { HTML5Backend } from 'react-dnd-html5-backend'
-//import { TouchBackend } from 'react-dnd-touch-backend'
-
+import MapProgressBar from './components/ui/GameProgressBar';
 
 
 function App() {
-
-  let startGame = useSelector(state => state.game.startGame);
-  let isBattle = useSelector(state => state.game.isBattle);
+  const startGame = useSelector(state => state.game.startGame);
+  const isBattle = useSelector(state => state.game.isBattle);
   
-  //return (<div className={Style.game}></div>);
+  
+  /*
+  return (<div className={Style.game} align="center" >
+      <MapProgressBar/>  
+    </div>
+  );
+  */
+  
   
   return (
       <div className={Style.app} align="center">    
         <GameBackGround align="center">
-        {
-            (!startGame) ? 
-            (
+        {(!startGame) ? 
+          (
+            <Fragment>
               <Menu/>
-            ): 
-            (
-              <DndProvider options={HTML5toTouch}> 
-                    <TopSection>
-                      <StatusBar/>
-                      <AppBar/>
-                    </TopSection>
-                    <CustomDragLayer />
-                    <Stage>
-                      <TurnButton/>
-                    </Stage>
-                    <CardStat />
-                    <div className={Style.cardSection} align="center">
-                      {( isBattle ? <HandDraw/> : <div></div> )}
-                    </div> 
-              </DndProvider>
-            )
-          }
+            </Fragment>
+          ): 
+          (
+            <Fragment>
+              <TopSection>
+                <StatusBar/>
+                <AppBar/>
+              </TopSection>
+              <CustomDragLayer />
+              <Stage></Stage> 
+              {(isBattle) ? <BattleStage><TurnButton/></BattleStage> : <div></div> }
+              <MapProgressBar/>
+              {(isBattle) ? <div className={Style.cardSection} align="center"><HandDraw/></div> : <div></div>  }              
+            </Fragment>
+          )
+        }
         </GameBackGround>
       </div>
   );

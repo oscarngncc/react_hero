@@ -45,8 +45,9 @@ export default function Card(props=defaultProps){
         item: { 
             type: 'Card',
             card: props.card,  //key of the cardData
-            index: props.index,
+            index: props.index ?? -1,
         },
+        canDrag: props.draggable ?? false,
         collect: (monitor) => ({
             isDragging: monitor.isDragging(),
             result: monitor.getDropResult(),

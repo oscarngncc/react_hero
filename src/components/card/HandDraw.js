@@ -11,17 +11,18 @@ import { useSelector } from 'react-redux';
 
 import { useDragLayer } from 'react-dnd'
 
-
+//window.innerHeight / window.innerWidth > 1 &&
 
 export default function HandDraw(){
     const inputLock = useSelector(state => state.game.inputLock);
     const cardList = useSelector(state => state.card.handList);
-    const [isProtrait, setisProtrait] = useState(window.innerHeight / window.innerWidth > 1 ? true : false);
+    const [isProtrait, setisProtrait] = useState( ( window.innerWidth < 1200 )  ? true : false);
     
-
     
     useEffect(() => {
-        window.addEventListener("resize", ()=>{  setisProtrait(window.innerHeight / window.innerWidth > 1 ? true : false)});    
+        window.addEventListener("resize", ()=>{  setisProtrait(
+            (  window.innerWidth < 1200 ) 
+        ? true : false)});    
         return () => {
             window.removeEventListener("resize", ()=>{} );
         }
@@ -105,8 +106,6 @@ export default function HandDraw(){
             distance += 2;
             topDistance += -2; 
         }
-
-
         
         let dynamicMargin = `0rem ${distance}rem`;
         let elevation = "";
@@ -145,7 +144,7 @@ export default function HandDraw(){
                 <animated.div 
                 style={{  ...animation  } }
                 >
-                   <div>
+                    <div>
                         <Card 
                         clickable={!inputLock} 
                         hoverable={true} 

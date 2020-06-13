@@ -25,7 +25,7 @@ export const normalTile = {
     key: NORMAL_TILE,
     movable: true,
     style: {
-        backgroundColor: "rgb(24,24,24)",
+        backgroundColor: "#1A1A1A",
     }
 }
 
@@ -33,7 +33,7 @@ export const attackTile = {
     key: ATTACK_TILE,
     movable: true,
     style: {
-        backgroundColor: "red",
+        backgroundColor: "#F16A70",
     }
 }
 
