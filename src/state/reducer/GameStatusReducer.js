@@ -216,13 +216,12 @@ function getAttacked(state, action){
     const hostKey = ( action.hostKey !== undefined) ? action.hostKey : PLAYER_ID;
     const targetKey = ( action.targetKey !== undefined) ? action.targetKey : PLAYER_ID;
 
-    if (hostKey === targetKey ){
+    const hostStatus = state.statuses[hostKey];
+    const targetStatus = state.statuses[targetKey];
+    if (targetStatus === undefined || hostStatus === undefined ){
         return state;
     }
 
-    const hostStatus = state.statuses[hostKey];
-    const targetStatus = state.statuses[targetKey];
-    
     //Damage Calculation
     let actualDmg = ( hostStatus.attack !== undefined ) ? hostStatus.attack : 0;
     actualDmg += (action.damage !== undefined ) ? action.damage : 0;

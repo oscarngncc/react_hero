@@ -3,7 +3,7 @@
 import React, {useState, useRef} from 'react'
 
 import Style from './../../css/Style.module.css';
-import  * as Action from './../../state/action/action';
+import  * as Action from '../../state/action/action';
 import { useDispatch } from 'react-redux';
 import { useSpring, useChain, animated, interpolate } from 'react-spring';
 import headerImage from './../../asset/TitlePic.png';
@@ -46,7 +46,7 @@ export default function Menu(props) {
         config:  { mass: 4, tension: 1000, friction: 120 },
     });
     const libraryInRef = useRef();
-    const libaryInSpring = useSpring({
+    const libraryInSpring = useSpring({
         from: {
             opacity: 0, 
             transform: "translateY(3rem)",
@@ -75,7 +75,7 @@ export default function Menu(props) {
 
     
     const sideStyle = isSide ? sideSpring : {};
-    const library = (isSide) ? <animated.div style={libaryInSpring}>
+    const library = (isSide) ? <animated.div style={libraryInSpring}>
         <Library></Library>
     </animated.div> : <div></div>;
     
@@ -84,7 +84,11 @@ export default function Menu(props) {
         <animated.div style={{...fadeSpring }}  >
             <div>
                 <animated.div class={Style.mainMenu } style={{...sideStyle}} >
-                    <div>
+                    <animated.div style={{opacity: libraryInSpring.opacity.interpolate(o => o) }} >
+                        Back
+                    </animated.div>
+                    
+                    <animated.div style={{ opacity: sideSpring.o.interpolate(o => o) }} >
                         <img src={headerImage} class={Style.headerImage} />
                         <ul>
                             <li class={Style.mainMenuItem} onClick={() => onClickStart() } >Play</li>
@@ -99,9 +103,8 @@ export default function Menu(props) {
                                 <img style={{margin:"0.8rem"}} src={GitHubMark}/>
                             </a>
                         </animated.div>
-                    </div>
-                </animated.div>
-                
+                    </animated.div>
+                </animated.div> 
                 {library}
             </div>
         </animated.div>
