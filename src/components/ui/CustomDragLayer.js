@@ -36,6 +36,8 @@ function getItemStyles(initialOffset, currentOffset) {
   }
 }
 
+
+
 const CustomDragLayer = (props) => {
 
     //Information about the object itself
@@ -62,6 +64,7 @@ const CustomDragLayer = (props) => {
     if (!isDragging) {
         return null;
     }
+    //else return <div>Draggable Card</div>
     else { 
         return (
         <div style={layerStyles}>
@@ -79,6 +82,7 @@ const CustomDragLayer = (props) => {
         </div>
     );
     }
+    
 }
 
 

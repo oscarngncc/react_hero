@@ -3,6 +3,7 @@ import React, {useState, useRef, useEffect} from 'react';
 import { useSpring, useTrail, animated, useChain } from 'react-spring';
 import {useSelector, useDispatch} from 'react-redux';
 import { useDrop } from 'react-dnd';
+import { Flipper, Flipped } from 'react-flip-toolkit';
 
 import Style from './../../css/Style.module.css';
 import * as Action from '../../state/action/action';
@@ -29,13 +30,13 @@ export default function BattleStage(props){
 
     const rowLen = STAGE_ROW;
     const colLen = STAGE_COL;
-    const totalLen = rowLen * colLen;
 
     const battleMap = useSelector(state => state.map.battleMap );
     const playerBattleCoord = useSelector( state => state.map.playerBattleMapCoord);
     const entitiesBattleCoords = useSelector( state => state.map.entityInMap);
     const BattleSteps = useSelector(state => state.game.steps);
     const inputLock = useSelector(state => state.game.inputLock );
+
 
     //Placeholder, shouldn't be in use
     const defaultMap = [    
@@ -53,8 +54,9 @@ export default function BattleStage(props){
 
 
     //This should be the only ones used by the presentation layer 
-    const currentMap = battleMap ?? defaultMap; 
+    const [currentMap, setcurrentMap] = useState( JSON.parse(JSON.stringify(battleMap ?? defaultMap))   );
     const currentPlayerCoord = playerBattleCoord ?? {x: 0, y: 0};
+
 
 
     /**
@@ -138,9 +140,7 @@ export default function BattleStage(props){
         if ( inputLock === true ){
             run(performEntitiesAction);
         }
-    }, [inputLock])
-
-    
+    }, [inputLock]);    
     /**
      * Since changing playerDirection re-triggers rendering of battle child
      * causing it to re-play animation in a different direction. Hence, need to setCardUsed Back to null
@@ -149,7 +149,6 @@ export default function BattleStage(props){
         setCardUsed(null);
         setCardUser(null);
     }, [playerStatus.direction]);
-
 
 
     /**
@@ -175,16 +174,16 @@ export default function BattleStage(props){
      * DND-Droppable
      * drop: only care about return undefined or not
      */
-    const [{ item, isOver, canDrop }, drop] = useDrop({
+    const [{ item, isOver}, drop] = useDrop({
         accept: 'Card',
         drop: () => { consumeCard(item); return item; },  
         collect: (monitor) => ({
             item: monitor.getItem(),
             isOver: monitor.isOver(),
-            canDrop: monitor.canDrop()
         })
     });
-
+    
+   
 
 
     /**
@@ -212,6 +211,7 @@ export default function BattleStage(props){
     }
 
 
+    
 
     /** 
      * use the card in hand, including using its effect and discard it
@@ -223,6 +223,7 @@ export default function BattleStage(props){
         const usable = runCardEffect(cardID, PLAYER_ID );
         if ( usable ){ dispatch(Action.CardAction.discardCard(index) ); }
     }
+    
 
 
     /**
@@ -269,9 +270,11 @@ export default function BattleStage(props){
     }
 
 
+
     /**
-     * Check if the tile will be used to display animation
+     * Check if the tile will be used to display animation 
      * NOTE: user can be the player or 
+     * NOTE: Performance Issue
      * @param {*} row coordinate of tile
      * @param {*} column coordinate of tile
      * @param {*} cardID ID of the card (default last used card)
@@ -287,7 +290,7 @@ export default function BattleStage(props){
         const userCoord = ( userID === PLAYER_ID ) ? currentPlayerCoord : entitiesBattleCoords[userID].Coord;
         const userStatus = statuses[userID] ?? {};
         const dirMultiplier = ( userStatus.direction === Constant.DIRECTION.left  ) ? -1 : 1;
-
+        
         for (let i = 0; i < target.length; i++ ){
             if ( row === userCoord.y + target[i].y && column === userCoord.x + target[i].x * dirMultiplier  ){
                 return true;
@@ -311,6 +314,33 @@ export default function BattleStage(props){
         dispatch(Action.GameStatusAction.incrementStep(-1));
     }
 
+    
+
+    //Check if isDragged
+    useEffect(() => {
+        if (isOver){
+            setcurrentMap( prev => {
+                let newMap = [...prev];
+                const target = CardData[item.card].target ?? [];
+                const playerDir = ( playerStatus.direction === Constant.DIRECTION.left ) ? -1 : 1; 
+                target.forEach( coord => {
+                    let y = currentPlayerCoord.y + coord.y * playerDir;
+                    let x = currentPlayerCoord.x + coord.x * playerDir;
+                    y = Math.min( rowLen - 1, Math.max(0, y) );
+                    x = Math.min( colLen - 1, Math.max(0, x) );
+                    //Apply Effect
+                    newMap[y][x] = Tile.ATTACK_TILE;
+                });
+                return newMap;
+            });
+        }
+        else {
+            //Slow Performance
+            setcurrentMap( JSON.parse(JSON.stringify(battleMap ?? defaultMap)) );
+        }
+    }, [isOver])
+    
+
 
     /**
      * Render child in battle map, incomplete
@@ -319,6 +349,7 @@ export default function BattleStage(props){
      */
     function renderBattleChild(row, column){
         let child = <div></div>;
+
         if (currentPlayerCoord.y === row && currentPlayerCoord.x === column ){
             child = <Player key="Player" />;
         }
@@ -327,9 +358,9 @@ export default function BattleStage(props){
             const attackable = checkMovable(row, column, 1, false) && BattleSteps > 0 ;
             child = <Entity monsterKey={key} attackable={attackable}/>;
         }
-        else if (checkMovable(row, column, 1, false) && BattleSteps > 0 && ! inputLock  ){
+        else if (checkMovable(row, column, 1, false) && BattleSteps > 0 && ! inputLock && ! isOver  ){
             child = (<ClickableCircle click={() => movePlayer(row, column) } />);
-        }
+        } 
 
         //check if effect is used in that tile
         const isEffect = ( checkEffect(row, column, cardUsed, cardUser) ) ?  CardData[cardUsed].particle : undefined;
@@ -337,21 +368,17 @@ export default function BattleStage(props){
     }
 
 
+    
+
     const dragMapStyle = (isOver) ? { boxShadow: "0 40px 100px -10px rgba(245, 245, 245, 0.35), 0 40px 40px -10px rgba(245, 245, 245, 0.3)"} : {};
     return (
         <div class={Style.stage} ref={drop} >
-            <animated.div class={Style.gameMap} style={ {...dragMapStyle }  } >
-                <ul class={Style.tileMap}>
+            <animated.div class={Style.gameMap} style={ {...dragMapStyle }  } > 
+                <ul class={Style.tileMap}>     
                     {currentMap.map((row, rowIndex) => {
                         return row.map((column, colIndex) => {
-                        
                             let index = rowIndex * STAGE_COL + colIndex;
                             let tileStyle = Tile.default[column.toString()].style; 
-
-                            //Check hover
-                            if (isOver && checkEffect(rowIndex, colIndex, item.card, PLAYER_ID) ){
-                                tileStyle = Tile.default[Tile.ATTACK_TILE].style;
-                            }
                             return (
                                 <animated.li 
                                 class={Style.floorUnit}
@@ -359,14 +386,15 @@ export default function BattleStage(props){
                                 style={{...tileStyle}}
                                 >
                                     {renderBattleChild(rowIndex, colIndex)}
-                                </animated.li> 
+                                </animated.li>                                   
                             );
                         })
                     })}
-                </ul>
+                </ul> 
             </animated.div>
             {props.children}
         </div>
     );    
 }
+
 

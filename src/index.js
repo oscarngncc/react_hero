@@ -5,6 +5,7 @@ import {Provider} from 'react-redux';
 import store from './state/store';
 import { DndProvider } from 'react-dnd-multi-backend';
 import HTML5toTouch from 'react-dnd-multi-backend/dist/esm/HTML5toTouch';
+import {BrowserRouter as Router} from 'react-router-dom';
 //import * as serviceWorker from './serviceWorker';
 
 import titlePic from './asset/TitlePic.png';
@@ -43,19 +44,22 @@ console.log(`A total of ${allImages.length} images are preloaded`);
 
 ReactDOM.render((
     <Provider store = {store} >
-        <DndProvider options={HTML5toTouch}> 
-            <Preload
-            images={allImages}
-            loadingIndicator = {<p>Loading</p>}
-            resolveOnError={true}
-            mountChildren={true}
-            >
-                <App />
-            </Preload>
-        </DndProvider>
+        <Router>
+            <DndProvider options={HTML5toTouch}> 
+                <Preload
+                images={allImages}
+                loadingIndicator = {<p>Loading</p>}
+                resolveOnError={true}
+                mountChildren={true}
+                >
+                    <App />
+                </Preload>
+            </DndProvider>
+        </Router>
     </Provider>
     ), 
 document.getElementById('root'));
+
 
 
 /* Progressive WebApp Only */

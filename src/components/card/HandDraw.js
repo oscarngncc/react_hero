@@ -16,12 +16,12 @@ import { useDragLayer } from 'react-dnd'
 export default function HandDraw(){
     const inputLock = useSelector(state => state.game.inputLock);
     const cardList = useSelector(state => state.card.handList);
-    const [isProtrait, setisProtrait] = useState( ( window.innerWidth < 1200 )  ? true : false);
+    const [isProtrait, setisProtrait] = useState( ( window.innerWidth < window.innerHeight )  ? true : false);
     
     
     useEffect(() => {
         window.addEventListener("resize", ()=>{  setisProtrait(
-            (  window.innerWidth < 1200 ) 
+            (  window.innerWidth < window.innerHeight ) 
         ? true : false)});    
         return () => {
             window.removeEventListener("resize", ()=>{} );

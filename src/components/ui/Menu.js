@@ -9,6 +9,7 @@ import { useSpring, useChain, animated, interpolate } from 'react-spring';
 import headerImage from './../../asset/TitlePic.png';
 import GitHubMark from './../../asset/ui/GitHub-Mark-32px.png';
 import Library from './Library';
+import {Link} from 'react-router-dom';
 
 
 export default function Menu(props) {
@@ -27,6 +28,7 @@ export default function Menu(props) {
     });
 
     
+    //Side Spring
     const defaultSideStyle = {
         height: "90vh",
         borderRadius: "0%",
@@ -61,6 +63,20 @@ export default function Menu(props) {
     useChain([sideMenuRef, libraryInRef] );
 
 
+    const neonSpring = useSpring({
+       from: {opacity: 1},
+       to: async next => {
+           while(true){
+                await next({opacity: 0.4});
+                await next({opacity: 1});
+                await new Promise(resolve => setTimeout(resolve, 8000));
+           }
+       },
+       delay: 2000,
+       config: {mass: 1, tension: 500, friction: 12}
+    })
+
+
     
     function onClickStart(){
         if (!aboutStart) setaboutStart(true);
@@ -84,27 +100,46 @@ export default function Menu(props) {
         <animated.div style={{...fadeSpring }}  >
             <div>
                 <animated.div class={Style.mainMenu } style={{...sideStyle}} >
+                    
                     <animated.div style={{opacity: libraryInSpring.opacity.interpolate(o => o) }} >
-                        Back
+                        <Link to="/" onClick={() => { setisSide(false);}} >
+                            {(isSide) ? "Back" : "" }
+                        </Link>
                     </animated.div>
+
                     
                     <animated.div style={{ opacity: sideSpring.o.interpolate(o => o) }} >
                         <img src={headerImage} class={Style.headerImage} />
                         <ul>
-                            <li class={Style.mainMenuItem} onClick={() => onClickStart() } >Play</li>
-                            <li class={Style.mainMenuItem} onClick={() => { setisSide(true); } } >Library</li>
-                            <li class={Style.mainMenuItem} >Setting</li>
+                            <li onClick={() => onClickStart()} style={{margin:"1.2rem"}} >
+                                <Link to="/game" class={Style.mainMenuItem}>
+                                    Play
+                                </Link>
+                            </li>
+                            <li onClick={() => { setisSide(true);}} style={{margin:"1.2rem"}} >
+                                <Link to="/library" class={Style.mainMenuItem}>
+                                    Library
+                                </Link>
+                            </li>
+                            <li style={{margin:"1.2rem"}} >
+                            <Link to="/setting" class={Style.mainMenuItem}  >
+                                    Setting
+                                </Link>
+                            </li>
                         </ul>
                         <animated.div style={{
                             opacity: sideSpring.o.interpolate(o => `${o}`),
                         }} > 
-                            <div>Design and Developed by: <br/>Innonion_ncc</div>
+                            <animated.div style={neonSpring} >Design and Developed by: 
+                                <br/>Innonion_ncc
+                            </animated.div>
                             <a href ="https://github.com/oscarngncc/react_hero">
                                 <img style={{margin:"0.8rem"}} src={GitHubMark}/>
                             </a>
                         </animated.div>
                     </animated.div>
-                </animated.div> 
+            
+                </animated.div>          
                 {library}
             </div>
         </animated.div>

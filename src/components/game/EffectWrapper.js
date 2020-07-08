@@ -13,6 +13,7 @@ export default function EffectWrapper(props) {
     );
     
 
+    /*
    const spring = useSpring({
     from: { 
         transform: "translateY(-1rem)", 
@@ -23,6 +24,7 @@ export default function EffectWrapper(props) {
         opacity: 1 
     },
   })
+  */
 
 
     /**
@@ -39,7 +41,7 @@ export default function EffectWrapper(props) {
 
 
     return (
-        <animated.div style={spring}>
+        <animated.div style={{}} >
             <div class={Style.effect} >
                 {effectIMG}
             </div>

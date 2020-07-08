@@ -13,7 +13,7 @@ export default function GameBackground(props){
     const particleNum = 30;
     const particleArr = new Array(particleNum).fill(0);
     const isBattle = useSelector(state => state.game.isBattle);
-    const [ bgChoice, setbgChoice] = useState(2);
+    const [ bgChoice, setbgChoice] = useState(0);
 
     useEffect(() => {
         setbgChoice( isBattle ? 1 : 2 )
