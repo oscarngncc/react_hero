@@ -121,13 +121,12 @@ body {
   background-color: whitesmoke;
 }
 
-
-
 .stage {
   margin: 5rem 0rem 1rem 0rem;
   width: var(--stage-width);
   height: calc( var(--stage-height) + 1rem);
 }
+
 
 .gameMap {
   position: relative;
@@ -146,18 +145,14 @@ body {
 }
 
 
+
 .floorUnit {
   position: relative;
   z-index: 2;
   float: left; 
-  background-color: lightblue;
   border-radius: 1rem;
-  border: solid white 0.3rem;
-  box-shadow: 0 12.5px 100px -10px rgba(50, 50, 73, 0.1), 0 10px 10px -10px rgba(50, 50, 73, 0.25);
-
   height: var(--floor-unit-height);
   width: var(--floor-unit-width);
-
   transition: background-color 0.25s ease-out;
 }
 

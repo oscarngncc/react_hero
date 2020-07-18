@@ -3,7 +3,8 @@ import React, {useState, useRef, useEffect} from 'react';
 import { useSpring, useTrail, animated, useChain } from 'react-spring';
 import {useSelector, useDispatch} from 'react-redux';
 import { useDrop } from 'react-dnd';
-import { Flipper, Flipped } from 'react-flip-toolkit';
+
+import FlipMove from 'react-flip-move';
 
 import Style from './../../css/Style.module.css';
 import * as Action from '../../state/action/action';
@@ -39,13 +40,7 @@ export default function BattleStage(props){
 
 
     //Placeholder, shouldn't be in use
-    const defaultMap = [    
-        [0, 0, 0, 0, 0,],
-        [0, 0, 0, 0, 0,],
-        [0, 0, 0, 0, 0,],
-        [0, 0, 0, 0, 0,],
-    ];
-
+    const defaultMap = new Array(rowLen).fill(0).map(() => new Array(colLen).fill(0) );
 
     //entity Statuses
     const statuses = useSelector( state => state.game.statuses );
@@ -56,7 +51,6 @@ export default function BattleStage(props){
     //This should be the only ones used by the presentation layer 
     const [currentMap, setcurrentMap] = useState( JSON.parse(JSON.stringify(battleMap ?? defaultMap))   );
     const currentPlayerCoord = playerBattleCoord ?? {x: 0, y: 0};
-
 
 
     /**
@@ -76,18 +70,17 @@ export default function BattleStage(props){
             }, time);
         }
 
-
         //Action start here:
         for ( var index = 0; index < entities.length; index++ ){
             const key = entities[index];
             const type = statuses[key].type;
             const distance = EntityData[type].distance;
             const style = EntityData[type].style;
-            const cards =EntityData[type].cards ?? [];
+            const cards = EntityData[type].cards ?? [];
 
             //Move Entity first
             for ( var count = 0; count < distance; count++ ){
-                const time = (index === 0 && count === 0 ) ? 0 : 400;
+                const time = (index === 0 && count === 0 ) ? 0 : 500;
                 yield delay(
                     () => { 
                         if (cardUsed !== null ){
@@ -102,7 +95,7 @@ export default function BattleStage(props){
             }
             //Perform cards afterwards
             for (var count = 0; count < cards.length; count++ ){
-                const time = (index === 0 && count === 0 ) ? 0 : 400;
+                const time = (index === 0 && count === 0 ) ? 0 : 300;
                 const cardID = cards[count];
                 yield delay(
                     () => runCardEffect(cardID, key),
@@ -349,7 +342,6 @@ export default function BattleStage(props){
      */
     function renderBattleChild(row, column){
         let child = <div></div>;
-
         if (currentPlayerCoord.y === row && currentPlayerCoord.x === column ){
             child = <Player key="Player" />;
         }
@@ -361,23 +353,30 @@ export default function BattleStage(props){
         else if (checkMovable(row, column, 1, false) && BattleSteps > 0 && ! inputLock && ! isOver  ){
             child = (<ClickableCircle click={() => movePlayer(row, column) } />);
         } 
-
         //check if effect is used in that tile
         const isEffect = ( checkEffect(row, column, cardUsed, cardUser) ) ?  CardData[cardUsed].particle : undefined;
         return <EffectWrapper effect={isEffect} refresh={refresh} >{child} </EffectWrapper>;
     }
-
-
     
+
+    //USED FOR FLIP - Debug
+    const flatEntitiesMap = [];
+    for ( var i = -1; i >= rowLen * colLen * -1; i-- ){ flatEntitiesMap.push(i); }
+    flatEntitiesMap[currentPlayerCoord.y * colLen + currentPlayerCoord.x] = PLAYER_ID;
+    Object.keys(entitiesBattleCoords).map( (key, index) => {
+        flatEntitiesMap[entitiesBattleCoords[key].Coord.y * colLen + entitiesBattleCoords[key].Coord.x] = key;
+    });
+    
+
 
     const dragMapStyle = (isOver) ? { boxShadow: "0 40px 100px -10px rgba(245, 245, 245, 0.35), 0 40px 40px -10px rgba(245, 245, 245, 0.3)"} : {};
     return (
         <div class={Style.stage} ref={drop} >
             <animated.div class={Style.gameMap} style={ {...dragMapStyle }  } > 
-                <ul class={Style.tileMap}>     
+                <ul>     
                     {currentMap.map((row, rowIndex) => {
                         return row.map((column, colIndex) => {
-                            let index = rowIndex * STAGE_COL + colIndex;
+                            const index = rowIndex * STAGE_COL + colIndex;
                             let tileStyle = Tile.default[column.toString()].style; 
                             return (
                                 <animated.li 
@@ -385,12 +384,24 @@ export default function BattleStage(props){
                                 key={"tile" + index.toString()} 
                                 style={{...tileStyle}}
                                 >
-                                    {renderBattleChild(rowIndex, colIndex)}
-                                </animated.li>                                   
+                                </animated.li>                           
                             );
                         })
                     })}
+                </ul>
+                
+                <ul style={{position: "absolute", top: "0" }} > 
+                    <FlipMove duration={300} leaveAnimation="none"  > 
+                        { ( flatEntitiesMap.map((item, index) => {   
+                            return (
+                                <li class={Style.floorUnit} key={item} >
+                                    { renderBattleChild( Math.floor(index/colLen), index % colLen ) }
+                                </li>                                               
+                            );         
+                        }))}
+                    </FlipMove>   
                 </ul> 
+                
             </animated.div>
             {props.children}
         </div>
@@ -398,3 +409,4 @@ export default function BattleStage(props){
 }
 
 
+//renderBattleChild( Math.floor(index/colLen), index % colLen )
