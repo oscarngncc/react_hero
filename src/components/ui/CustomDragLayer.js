@@ -28,7 +28,7 @@ function getItemStyles(initialOffset, currentOffset) {
       display: 'none',
     }
   }
-  let { x, y } = currentOffset
+  let { x, y } = currentOffset;
   const transform = `translate(${x}px, ${y}px)`
   return {
     transform,
@@ -43,27 +43,19 @@ const CustomDragLayer = (props) => {
     //Information about the object itself
     const {
     item,  //This contains the extra information
-    itemType,
     isDragging,
     initialOffset,
     currentOffset,
     } = useDragLayer((monitor) => ({
     item: monitor.getItem(),
     isDragging: monitor.isDragging(),
-    itemType: monitor.getItemType(),
     initialOffset: monitor.getInitialSourceClientOffset(),
     currentOffset: monitor.getSourceClientOffset(),
     }));
 
-
-    /**
-     * this layer has no effect until a dragging is happening
-     */
-    
     if (!isDragging) {
         return null;
     }
-    //else return <div>Draggable Card</div>
     else { 
         return (
         <div style={layerStyles}>
@@ -73,10 +65,8 @@ const CustomDragLayer = (props) => {
         </div>
     );
     }
-    
 }
 
-//<Card clickable={false} hoverable={false} draggable={false} card={item.card} />
 export default CustomDragLayer;
 
 

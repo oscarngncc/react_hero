@@ -77,18 +77,12 @@ export default function HandDraw(){
 
             //Only One Layer
             if (cardList.length <= cardsPerLayer ){
-                topDist="-12rem";
+                topDist="-10rem";
             } 
             //More than one layer (i.e. 2)
             else {
-                if (index < cardsPerLayer ){
-                    //TOP
-                    topDist="-5rem";
-                }
-                else { 
-                    //DOWN
-                    topDist="-12rem";
-                }
+                //TOP OR DOWN
+                topDist = ( index < cardsPerLayer ) ? "-4rem" : "-10rem";
             }
 
             return {
