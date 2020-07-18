@@ -90,9 +90,9 @@ export default function Library() {
     return (
         <div class={Style.library} >
             <ul class = {Style.librarySelection}>
-                <li class={Style.selectionTab} onClick={() => setlistChoice(0)} >Card List</li>
-                <li class={Style.selectionTab} onClick={() => setlistChoice(1)} >Entity List</li>
-                <li class={Style.selectionTab} onClick={() => setlistChoice(2)} >Event List</li>
+                <li class={`${Style.selectionTab} ${Style.boxButton}` } onClick={() => setlistChoice(0)} >Card List</li>
+                <li class={`${Style.selectionTab} ${Style.boxButton}` } onClick={() => setlistChoice(1)} >Entity List</li>
+                <li class={`${Style.selectionTab} ${Style.boxButton}` } onClick={() => setlistChoice(2)} >Event List</li>
             </ul>
             <ul class={Style.libraryItemSection}>
                 { Object.keys(choosedList).map((key, index) => renderChild(key) )}

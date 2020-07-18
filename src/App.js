@@ -28,35 +28,7 @@ function App() {
   );
   */
   
-  /*
-  <div className={Style.app} align="center">    
-        <GameBackGround align="center">
-        {(!startGame) ? 
-          (
-            <Fragment>
-              <Menu/>
-            </Fragment>
-          ): 
-          (
-            <Fragment>
-              <TopSection>
-                <StatusBar/>
-                <AppBar/>
-              </TopSection>
-              <CustomDragLayer />
-              <Stage></Stage> 
-              {(isBattle) ? <BattleStage><TurnButton/></BattleStage> : <div></div> }
-              <MapProgressBar/>
-              {(isBattle) ? <div className={Style.cardSection} align="center"><HandDraw/></div> : <div></div>  }              
-            </Fragment>
-          )
-        }
-        </GameBackGround>
-      </div>
-  */
-
-
-
+  
   return (
       <div className={Style.app} align="center">    
         <GameBackGround align="center">
@@ -82,13 +54,8 @@ function App() {
         }
         </GameBackGround>
       </div>
-  );
-  
+  ); 
 }
-
-
 export default App;
 
 
-
-// <GameBackGround align="center"></GameBackGround>

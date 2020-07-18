@@ -56,7 +56,6 @@ const CustomDragLayer = (props) => {
     }));
 
 
-
     /**
      * this layer has no effect until a dragging is happening
      */
@@ -68,16 +67,8 @@ const CustomDragLayer = (props) => {
     else { 
         return (
         <div style={layerStyles}>
-            <div style={getItemStyles(initialOffset, currentOffset)}>
-                
-            <div class={Style.card}>
-                <div class={Style.cardInner} > 
-                    <div class={[Style.frontCard].join(' ')} >
-                        {item.card}
-                    </div>
-                </div>
-            </div>
-
+            <div style={getItemStyles(initialOffset, currentOffset)}>     
+              <Card clickable={false} hoverable={false} draggable={false} card={item.card} />
             </div>
         </div>
     );
@@ -85,21 +76,7 @@ const CustomDragLayer = (props) => {
     
 }
 
-
 //<Card clickable={false} hoverable={false} draggable={false} card={item.card} />
-
-/*
-<div class={Style.card}>
-    <div class={Style.cardInner} > 
-        <div class={[Style.frontCard].join(' ')} >
-            {item.card}
-        </div>
-    </div>
-</div>
-*/
-
-
-
 export default CustomDragLayer;
 
 

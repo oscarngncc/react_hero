@@ -87,7 +87,9 @@ export default function Card(props=defaultProps){
     };
 
 
-
+    if ( Card === undefined || Card === null ){
+        return <div></div>;
+    }
     return (
         <div 
             class={Style.card} 

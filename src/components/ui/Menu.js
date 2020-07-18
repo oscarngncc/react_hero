@@ -110,27 +110,28 @@ export default function Menu(props) {
                     
                     <animated.div style={{ opacity: sideSpring.o.interpolate(o => o) }} >
                         <img src={headerImage} class={Style.headerImage} />
-                        <ul>
-                            <li onClick={() => onClickStart()} style={{margin:"1.2rem"}} >
-                                <Link to="/game" class={Style.mainMenuItem}>
-                                    Play
-                                </Link>
-                            </li>
-                            <li onClick={() => { setisSide(true);}} style={{margin:"1.2rem"}} >
-                                <Link to="/library" class={Style.mainMenuItem}>
-                                    Library
-                                </Link>
-                            </li>
-                            <li style={{margin:"1.2rem"}} >
-                            <Link to="/setting" class={Style.mainMenuItem}  >
-                                    Setting
-                                </Link>
-                            </li>
-                        </ul>
+            
+                        <Link to="/game" onClick={() => onClickStart()}  >
+                            <div class={`${Style.mainMenuItem} ${Style.boxButton}`} >
+                                Play
+                            </div>
+                        </Link>
+                        <Link to="/library" onClick={() => { setisSide(true);}}  >
+                            <div class={`${Style.mainMenuItem} ${Style.boxButton}`} >
+                                Library
+                            </div>
+                        </Link>            
+                        <Link to="/setting">
+                            <div class={`${Style.mainMenuItem} ${Style.boxButton}`} >
+                                Setting
+                            </div>
+                        </Link>
+                            
+
                         <animated.div style={{
                             opacity: sideSpring.o.interpolate(o => `${o}`),
                         }} > 
-                            <animated.div style={neonSpring} >Design and Developed by: 
+                            <animated.div>Design and Developed by: 
                                 <br/>Innonion_ncc
                             </animated.div>
                             <a href ="https://github.com/oscarngncc/react_hero">

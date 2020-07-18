@@ -43,7 +43,7 @@ Object.keys(EventData).map((key, index) => {
 console.log(`A total of ${allImages.length} images are preloaded`);
 
 ReactDOM.render((
-    <Provider store = {store} >
+    <Provider store={store} >
         <Router>
             <DndProvider options={HTML5toTouch}> 
                 <Preload
