@@ -255,8 +255,6 @@ function defeatEntity(state, action){
     const reward = state.statuses[entityKey].reward ?? 0;
     const newMoney = Math.min( Number.MAX_SAFE_INTEGER, state.money + reward );
 
-    //alert(entityKey);
-
     //destructure to delete
     const { [entityKey]: value , ...newEntitiesStatus } = state.statuses;
     const newEntity = state.entities.filter( a => a !== entityKey ); 

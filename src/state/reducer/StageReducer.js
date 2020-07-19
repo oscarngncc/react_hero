@@ -1,6 +1,7 @@
 
 import * as Action from '../action/action';
 import * as Event from './../../data/event/Event';
+import { STAGE_ROW, STAGE_COL } from '../constant';
 
 
 /**
@@ -27,6 +28,7 @@ let initState = {
             }
         */
     },
+    particleInMap: new Array( STAGE_ROW ).fill(null).map(() => new Array( STAGE_COL ).fill(null)),
 }
 
 
@@ -47,10 +49,8 @@ function movePlayer(state, action, isGameMap ){
     let xPos = action.Coord.x;
     let yPos = action.Coord.y;
 
-
     //move in game map
     if ( isGameMap ){
-
         //Update Event
         let events = state.eventInMap;
         events[state.playerGameMapCoord.y][state.playerGameMapCoord.x] = Event.EMPTY;
@@ -177,6 +177,15 @@ function generateEvent(state, action){
 }
 
 
+function setParticleInMap(state, action){
+    return updateObject(state, {
+        ...state,
+        particleInMap: action.map,
+    })
+}
+
+
+
 function clearEvent(state, action){
     let events = state.eventInMap;
     events[action.Coord.y][action.Coord.x] = Event.EMPTY;
@@ -229,6 +238,8 @@ export default function StageReducer(state = initState, action){
             return clearEvent(state, action);
         case Action.StageAction.MOVE_ENTITY_BATTLEMAP:
             return moveEntity(state, action);
+        case Action.StageAction.SET_PARTICLE_IN_MAP:
+            return setParticleInMap(state, action);
         default:
     }
     return state;

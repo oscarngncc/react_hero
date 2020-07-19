@@ -1,7 +1,8 @@
 
 
 import makeActionCreator from './actionCreator';
-
+import { PLAYER_ID } from '../constant';
+import CardData from './../../data/card/Card';
 
 export const DRAW_CARD = "drawCard";
 export const DISCARD_CARD = "discardCard";
@@ -60,6 +61,23 @@ export function drawCard(num){
         }
     }
 }
+
+
+/**
+ * Execute the effect of the card
+ * NOTE: Doesn't really consume the card
+ * NOTE: This function also works for entities using their moves (as card)
+ * @param {*} cardID 
+ */
+export function runCardEffect( cardID, hostKey = PLAYER_ID ){
+    return (dispatch) => {
+        const Card = CardData[cardID] ?? {};
+        for (var action in Card.effect ){
+            dispatch( Card.effect[action](hostKey)  );
+        }
+    }
+}
+
 
 
 

@@ -2,6 +2,7 @@
 import makeActionCreator from './actionCreator';
 import {CardAction, StageAction} from './action';
 import * as Constant from './../constant';
+import EntityData from './../../data/entity/Entity';
 
 
 /**
@@ -80,12 +81,9 @@ export function iterateTurn(){
         else {
             dispatch( CardAction.drawCard(4) );
         }
-
         dispatch( resetStep() );
     }
 }
-
-
 
 
 
@@ -124,6 +122,52 @@ export function startGame(value){
 }
 
 
+export function runEntitiesAction( runCardEffect ){
+    return (dispatch, getState) => {
+        const delay = (func, time) => {
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    func();
+                    resolve();
+                }, time);
+            });
+        }
+
+        const runEntityAction = async (index, key, type) => {
+            const distance = EntityData[type].distance;
+            const style = EntityData[type].style;
+            const cards = EntityData[type].cards ?? [];
+    
+            //Move First
+            for ( var count = 0; count < distance; count++ ){
+                const time = (index === 0 && count === 0 ) ? 0 : 500;
+                await delay( ()=>{ 
+                    dispatch(StageAction.moveEntityInBattle(key, style, getState().map.playerBattleMapCoord )); 
+                } ,time)
+            }
+             //Perform cards afterwards
+             for (var count = 0; count < cards.length; count++ ){
+                const time = (count === 0 ) ? 0 : 300;
+                const cardID = cards[count];
+                await delay( () => runCardEffect(cardID, key), time);
+            }
+        }
+
+        const runEntities = async () => {
+            for ( var index = getState().game.entities.length -1; index >= 0; index-- ){
+                const key = getState().game.entities[index];
+                const type = getState().game.statuses[key].type;
+                console.log(getState().game.entities);
+                await runEntityAction(index, key, type);
+                
+            }
+
+            dispatch(iterateTurn())
+            dispatch(setInputLock(false))
+        }
+        runEntities();
+    }
+}
 
 
 //Simple Action based on Action creator

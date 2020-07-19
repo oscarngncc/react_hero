@@ -3,6 +3,7 @@ import makeActionCreator from './actionCreator';
 import * as Event from './../../data/event/Event';
 import * as Tile from './../../data/tile/Tile';
 import * as Entity from './../../data/entity/Entity';
+import CardData from './../../data/card/Card';
 import * as Level from '../../data/level/Level';
 import * as Constant from './../constant';
 import moveEntityInBattle, {MOVE_ENTITY_BATTLEMAP} from './StageEntityAction';
@@ -19,6 +20,7 @@ export const GENERATE_LEVEL_BATTLE = "generateLevelInBattle";
 export const MOVE_PLAYER_GAMEMAP = "movePlayerInMap";
 export const MOVE_PLAYER_BATTLEMAP = "movePlayerInBattle";
 export const CLEAR_EVENT_GAMEMAP = "clearEventInMap";
+export const SET_PARTICLE_IN_MAP = "setParticleINMAP";
 
 
 const stageRow = Constant.STAGE_ROW ;
@@ -133,6 +135,27 @@ export function generateEvent(pathLength){
 }
 
 
+export function setParticleWithCard(cardID, hostKey=Constant.PLAYER_ID ){
+  return (dispatch, getState) => {
+ 
+    const Card = CardData[cardID] ?? {};
+    const {x, y} = (hostKey === Constant.PLAYER_ID) ? getState().map.playerBattleMapCoord : getState().map.entityInMap[hostKey].Coord;
+    const userStatus = getState().game.statuses[hostKey] ?? {};
+    const dirMultiplier = ( userStatus.direction === Constant.DIRECTION.left  ) ? -1 : 1;
+
+    let newParticles = new Array(Constant.STAGE_ROW).fill(null).map(() => new Array(Constant.STAGE_COL).fill(null) );
+    Card.target.map((target) => {
+        const affectedY = y + target.y;
+        const affectedX = x+ target.x * dirMultiplier;
+        if (affectedY < Constant.STAGE_ROW && affectedY >= 0  && affectedX < Constant.STAGE_COL && affectedX >= 0 ){
+            newParticles[affectedY][affectedX] = Card.particle ?? '';
+        }
+    });
+
+    dispatch( setParticleInMap(newParticles) );
+  }
+}
+
 
 /**
  * Action creator for Generate Battle Arena 
@@ -169,7 +192,7 @@ export function generateLevelInBattle(){
 export const clearEventInMap = makeActionCreator(CLEAR_EVENT_GAMEMAP, 'Coord');
 export const movePlayerInMap = makeActionCreator(MOVE_PLAYER_GAMEMAP, 'Coord');
 export const movePlayerInBattle = makeActionCreator(MOVE_PLAYER_BATTLEMAP, 'Coord');
-
+const setParticleInMap = makeActionCreator(SET_PARTICLE_IN_MAP, 'map');
 
 /**
  * export StageEntityAction

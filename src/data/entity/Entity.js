@@ -12,8 +12,8 @@ export const ghost = {
     distance: 3,
     health: 20,
     reward: 10,
-    attack: 20,
-    style: MOVE_STYLE.defense,
+    attack: 1,
+    style: MOVE_STYLE.random,
     get cards(){ return [ 
         Card.SPRIAL_OF_LIGHT,
     ]},

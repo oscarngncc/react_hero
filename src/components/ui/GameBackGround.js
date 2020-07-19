@@ -10,7 +10,7 @@ import Style from './../../css/Style.module.css';
 
 
 export default function GameBackground(props){
-    const particleNum = 30;
+    const particleNum = 6;
     const particleArr = new Array(particleNum).fill(0);
     const isBattle = useSelector(state => state.game.isBattle);
     const [ bgChoice, setbgChoice] = useState(0);
@@ -20,7 +20,7 @@ export default function GameBackground(props){
     }, [isBattle])
     
 
-    const snowSprings = useSprings(particleNum, particleArr.map( function(item){ 
+    const snowSprings = useSprings( particleNum, particleArr.map( function(item){ 
         let xStart = Math.floor(Math.random() * 100);
         let yStart = (Math.floor(Math.random() * 20) + 20) * -1;
         let delay = Math.floor(Math.random() * 10000);
@@ -57,11 +57,10 @@ export default function GameBackground(props){
 
 
 
-    const [laserSprings, setLaser, stopLaser] = useSprings(particleNum, function(index){ 
+    const [laserSprings, setLaser, stopLaser] = useSprings( particleNum, function(index){ 
         let delay = Math.floor(Math.random() * 4000);
         let xStart = Math.floor(Math.random() * 100);
-        xStart = "translateX(" + xStart.toString() + "vw)";
-        
+        xStart = "translateX(" + xStart.toString() + "vw)";       
         return({
             from: {
                 opacity: 0,
@@ -77,7 +76,7 @@ export default function GameBackground(props){
 
                     await next({
                         transform: xEnd,
-                        opacity: (index%6===0) ? 0.1 : 0,
+                        opacity: 0.1,
                         width: width,
                     });
                 }  
@@ -96,8 +95,6 @@ export default function GameBackground(props){
     ];
 
 
-    
-
 
     function renderParticle(index){
         return (
@@ -108,7 +105,6 @@ export default function GameBackground(props){
         );
              
     }
-
 
     return (
     <div className= {Style.game} >

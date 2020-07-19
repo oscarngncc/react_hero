@@ -5,28 +5,11 @@ import {useSpring, animated} from 'react-spring';
 import Style from './../../css/Style.module.css';
 
 export default function EffectWrapper(props) {
-
-    
-    const effectUrl = (props.effect !== undefined && props.effect !== null ) ? require("./../../asset/particles/" + props.effect.toString()) : null;
+    const effectUrl = (props.effect !== undefined && props.effect !== null) ? require("./../../asset/particles/" + props.effect.toString()) : null;
     const effectIMG = (effectUrl === null ) ? <div></div> : (
         <img src={effectUrl + `?a=${props.refresh}` }  class={Style.stageParticle} alt={""} />
     );
     
-
-    /*
-   const spring = useSpring({
-    from: { 
-        transform: "translateY(-1rem)", 
-        opacity: 0.75
-    },
-    to: {
-        transform: "translateY(0rem)", 
-        opacity: 1 
-    },
-  })
-  */
-
-
     /**
      * run Special Effect, if after effect provided
      */
